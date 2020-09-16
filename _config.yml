@@ -23,7 +23,7 @@ sass:
 # Site Data
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 baseurl: # the subpath of your site, e.g. /blog
-title: Blog | xoreth notes
+title: xoreth (coret) 
 description: "The Notes Of System Engineer"
 keywords: 'blog,IT,sysadmin,devops'
 author:
