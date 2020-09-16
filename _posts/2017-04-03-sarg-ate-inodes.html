@@ -1,0 +1,29 @@
+---
+layout: post
+title: SARG Ate INodes
+author: Galuh D Wijatmiko
+categories: [Networks,Server,Troubleshot]
+tags: [squid,sarg]
+---
+
+<p>An index node (or inode) contains metadata information (file size, file type, etc.) for a file system object (like a file or a directory). There is one inode per file system object.</p>
+<p>An inode doesn't store the file contents or the name: it simply points to a specific file or directory.<br />
+check inode<!--more--></p>
+<blockquote><p>df -ih</p></blockquote>
+<p>output :</p>
+<blockquote><p>
+Filesystem           Inodes IUsed IFree IUse% Mounted on<br />
+/dev/mapper/vg_os-lv_root<br />
+                       1.3M   90K  1.2M    7% /<br />
+tmpfs                  352K     5  352K    1% /dev/shm<br />
+/dev/sda1              128K    46  128K    1% /boot<br />
+/dev/mapper/vg_os-lv_var<br />
+                        28M  8.3M   19M   31% /var<br />
+/dev/mapper/vg_home-lv_home<br />
+                       117M   12K  117M    1% /home
+</p></blockquote>
+<p>check spesific</p>
+<blockquote><p>for i in /var/*; do echo $i; find $i |wc -l; done</p></blockquote>
+<p>and then delete huge directory</p>
+<p>in /etc/sarg/sarg.conf change param </p>
+<blockquote><p>overwrite_report yes</p></blockquote>

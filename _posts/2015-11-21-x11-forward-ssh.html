@@ -1,0 +1,18 @@
+---
+layout: post
+title: X11 Forward SSH
+author: Galuh D Wijatmiko
+categories: [Server]
+tags: [Service,ssh]
+---
+
+<blockquote>X11 Forward ssh</p></blockquote>
+<p><!--more--></p>
+<div class="attribution">
+<p>on rpm based</p>
+<blockquote><p>yum install xorg-x11-auth xorg-x11-fonts-* xorg-x11-utils libX11 xorg-x11-server-utils.xorg-x11-xauth"</p></blockquote>
+<p>on sshd_config change option X11ForwardEnable to Yes value.</p>
+<blockquote><p>ssh -X user@ip</p></blockquote>
+<p>for test</p>
+<blockquote><p>xclock</p></blockquote>
+</div>

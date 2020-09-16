@@ -1,0 +1,17 @@
+---
+layout: post
+title: Build VM From Virtualbox to Box Vagrant 
+author: Galuh D Wijatmiko
+categories: [Server,Virtualization]
+tags: [Server,vagrant]
+---
+
+<p>List UUID vms from virtualbox </p>
+<blockquote><p>vboxmanage list vms</p></blockquote>
+<p><em>"CentOS7.2" {ca1a2913-4fb2-433f-a48c-ddc9bf39adc2}<br />
+"CentOS6.7" {59051034-c1c8-44cb-b985-cd641b790690}<br />
+"Secure-Server" {65a96744-9a9b-4aa7-9712-6b4db57bc251}<br />
+"CentOS5.11" {f3422046-701a-4428-b94e-ca95e00a6565}<br />
+"centos7_default_1487834692651_84891" {f1672b12-55cd-4327-91e5-43c0eee02532}</em></p>
+<p>Build :</p>
+<blockquote><p> vagrant package --base 65a96744-9a9b-4aa7-9712-6b4db57bc251 --output sec-server.box</p></blockquote>

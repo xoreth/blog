@@ -1,0 +1,63 @@
+---
+layout: post
+title: Install Monit Agent in Debian Base
+author: Galuh D Wijatmiko
+categories: [Server]
+tags: [Monit,Service]
+---
+
+<h2><strong>DEBIAN</strong></h2>
+<p>Install</p>
+<blockquote><p>apt-get install monit</p></blockquote>
+<p>Configuration<br />
+add config in /etc/monit/monitrc<br />
+<!--more--></p>
+<blockquote><p>## Email Configuration ######<br />
+set mailserver 10.32.10.11 PORT 25<br />
+set alert alert@roomit.com<br />
+set mail-format { from: monit.secure@roomit.com<br />
+subject: MailFromMonit<br />
+message: Monit $ACTION $SERVICE at $DATE on $HOST: $DESCRIPTION.</p>
+<p>Yours sincerely,<br />
+ROOMI TechSupport<br />
+}</p>
+<p>## Event Process restart, stop start<br />
+set eventqueue<br />
+basedir /var/lib/monit/events # set the base directory where events will be stored<br />
+slots 100 # optionally limit the queue size</p>
+<p>#parsing data to monit server in port 8080, if not using monit server we can comment this configuration<br />
+set mmonit http://<user>:
+<password>@<host>:
+<port>/collector ####comment with #</p>
+<p>## Listen port 2812 http in path /var/cacert<br />
+set httpd port 2812<br />
+SSL DISABLE</p>
+<p>#### binding address to 0.0.0.0 can be access from outside, and allow IP can be access. Using group OS ops to login</p>
+<p>use address 0.0.0.0<br />
+allow localhost<br />
+allow 10.32.5.0/8<br />
+allow @ops</port></host></password></user></p></blockquote>
+<p>Information :<br />
+we make group ops and add user to ops group for login monit.<br />
+Start running monit</p>
+<blockquote><p>systemctl start monit</p></blockquote>
+<p>Access monit via browser</p>
+<blockquote><p>https://ip:2812/</p></blockquote>
+<p>Template config in debian store in /etc/monit/conf-available/* . for enable config, example we need httpd service monitoring and create event stop, restart and start. Copy /etc/monit/conf-available/apache2 to enable directory in conf-enabled.</p>
+<blockquote><p>cp /etc/monit/conf-available/apache2 /etc/monit/conf-available/apache2</p></blockquote>
+<p>if we look configuration file :</p>
+<blockquote><p>check process apache with pidfile /var/run/apache2/apache2.pid<br />
+group www<br />
+group apache<br />
+start program = "/etc/init.d/apache2 start"<br />
+stop program = "/etc/init.d/apache2 stop"<br />
+if 4 restarts within 20 cycles then timeout<br />
+if failed host localhost port 80 with protocol http and request "/server-status" with timeout 25 seconds for 4 times within 5 cycles then restart<br />
+depend apache_bin<br />
+depend apache_rc</p>
+<p>check file apache_bin with path /usr/sbin/apache2<br />
+group apache<br />
+include /etc/monit/templates/rootbin</p>
+<p>check file apache_rc with path /etc/init.d/apache2<br />
+group apache<br />
+include /etc/monit/templates/rootbin</p></blockquote>

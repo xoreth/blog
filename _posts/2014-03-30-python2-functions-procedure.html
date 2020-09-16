@@ -1,0 +1,47 @@
+---
+layout: post
+title: "[Python2] Function Procedure"
+author: Galuh D Wijatmiko
+categories: [Programming]
+tags: [python2]
+---
+
+<p class="p0"><em>Deklarasi </em></p>
+<p class="p0">def Nama_Fungsi(Parameter,paramter,..) :</p>
+<p class="p0">Body</p>
+<p class="p0"><!-- more --> <!--more--></p>
+<p class="p0"><em><strong>Contoh Konversi suhu</strong> </em></p>
+<p class="p0">def segitiga(tinggi,alas):</p>
+<p class="p0">    hasil=(1.0/2)*tinggi*alas</p>
+<p class="p0">    return hasil</p>
+<p class="p0"> print segitiga(3,8)</p>
+<p class="p0">def fah2cel(fahrenheit):</p>
+<p class="p0">    celcius=(5.0/9)*(fahrenheit-32)</p>
+<p class="p0">    return celcius</p>
+<p class="p0"> print fah2cel(2)</p>
+<p class="p0">def fah2kel(fahrenheit):</p>
+<p class="p0">    celcius=fah2cel(fahrenheit)</p>
+<p class="p0">    kelvin=celcius+273.15</p>
+<p class="p0">    return kelvin</p>
+<p class="p0">print fah2kel(2)</p>
+<p class="p0">def hello():</p>
+<p class="p0">    print "helo kehed"</p>
+<p class="p0"> hello()</p>
+<p class="p0"><em><strong>Output :</strong></em></p>
+<p class="p0"><em>-16.6666666667<br />
+256.483333333<br />
+helo kehed<br />
+4 9</em></p>
+<p>&nbsp;</p>
+<p class="p0"><strong><em>Procedure</em></strong></p>
+<pre class="prettyprint tryit prettyprinted"><span class="com">#!/usr/bin/python</span>
+
+<span class="typ">Money</span> <span class="pun">=</span> <span class="lit">2000</span>
+<span class="kwd">def</span> <span class="typ">AddMoney</span><span class="pun">():</span>
+   <span class="com"># Uncomment the following line to fix the code:</span>
+   <span class="com"># global Money</span>
+   <span class="typ">Money</span> <span class="pun">=</span> <span class="typ">Money</span> <span class="pun">+</span> <span class="lit">1</span>
+
+<span class="kwd">print</span> <span class="typ">Money</span>
+<span class="typ">AddMoney</span><span class="pun">()</span>
+<span class="kwd">print</span> <span class="typ">Money</span></pre>

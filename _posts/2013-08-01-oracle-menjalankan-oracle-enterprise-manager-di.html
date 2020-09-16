@@ -1,0 +1,36 @@
+---
+layout: post
+title: "[Oracle  11 G] Menjalankan Oracle Enterprise Manager"
+author: Galuh D Wijatmiko
+categories: [Databases]
+tags: [oracle,database]
+---
+
+
+<p>Menjalankan Oracle Enterprise Manager Database di #igosnusantara</p>
+<p>disable    host :<br />
+<strong>xhost +</strong><br />
+<!-- more --><br />
+masuk ke user oracle :<br />
+<strong>su oracle</strong><!--more--></p>
+<p>jalankan listener:<br />
+<strong>lsnrctl    start</strong></p>
+<p>hidupkan database :<br />
+<strong>dbstart</strong></p>
+<p>Jika service ini belum berjalan    lihat,<br />
+[1]http://blog.wajatmaka.com/post/57059655515/membuat-listener-oracle-11g-di-igos-nusantara<br />
+[2]http://blog.wajatmaka.com/post/57094536163/menjalankan-service-database-di-igos-nusantara</p>
+<p>setelah    berhasil, selanjutnya :<br />
+<strong>emctl start dbconsole</strong></p>
+<p>jika output adalah :<br />
+<em>Oracle Enterprise Manager 11g Database Control Release 11.2.0.1.0</em><br />
+<em>Copyright © 1996, 2009 Oracle Corporation.  All rights reserved.</em><br />
+<em>https://igosnusantara:1158/em/console/aboutApplication</em><br />
+<em>Oracle Enterprise Manager 11g is running.</em><br />
+<em>——————————————————————</em><br />
+<em>Logs are generated in directory /opt/oracle/product/11.2.0/db_1/igosnusantara_basedata/sysman/log</em></p>
+<p>maka  berhasil.</p>
+<p>lalu akses via web browser :<br />
+<em>https://igosnusantara:1158/em/console/aboutApplication</em><br />
+atau<br />
+<em><a href="https://127.0.0.1:1158/em/console/aboutApplication">https://127.0.0.1:1158/em/console/aboutApplication</a></em></p>

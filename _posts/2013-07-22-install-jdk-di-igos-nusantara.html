@@ -1,0 +1,27 @@
+---
+layout: post
+title: "Switch version Java"
+author: Galuh D Wijatmiko
+categories: [Tools]
+tags: [jdk,jvm]
+---
+
+<p><a href="http://download.oracle.com/otn-pub/java/jdk/7u25-b15/jdk-7u25-linux-x64.tar.gz">http://download.oracle.com/otn-pub/java/jdk/7u25-b15/jdk-7u25-linux-x64.tar.gz</a> &gt;&gt; 64bit</p>
+<p><a href="http://download.oracle.com/otn-pub/java/jdk/7u25-b15/jdk-7u25-linux-i586.tar.gz%C2%A0">http://download.oracle.com/otn-pub/java/jdk/7u25-b15/jdk-7u25-linux-i586.tar.gz </a> &gt;&gt; 32bit<!-- more --></p>
+<p><!--more-->ekstrak dan simpan di /opt dan rubah nama jdk1.7.0_25 di /opt</p>
+<p><strong>sudo tar xvf jdk-7u25-linux-x64.tar.gz -C /op</strong><strong>t</strong><br />
+<strong>cd /opt</strong></p>
+<p><strong>sudo mv jdk1.7.0_25 jdk</strong></p>
+<p>ubah kepemilikan<strong><br />
+</strong></p>
+<p><strong>sudo chown namaUser:groupUser -R jdk/<br />
+</strong></p>
+<p>Kembali ke /home/user</p>
+<p><strong>cd ~/</strong></p>
+<p>lalu daftarkan path direktori jdk pada konfigurasi shell bash/zsh di ~/.zshrc atau di ~/.bashrc</p>
+<p><strong>export PATH=$PATH:/opt/jdk:.</strong></p>
+<p>Jika sudah menulis simpan keluar lalu restart atau ketikan</p>
+<p><strong>resource  ~/.zshrc</strong></p>
+<p>untuk reload atau membaca ulang path.</p>
+<p>ketikan :</p>
+<p><strong>java -version</strong></p>

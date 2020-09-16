@@ -1,0 +1,8 @@
+---
+layout: post
+title: Preun Scriplet When Removing RPM Packages
+categories: [Packaging,Troubleshot,Script]
+tags: [Linux,Package,LinuxPackage,Script]
+---
+
+<pre><code>rpm -qa | grep MariaDB | xargs rpm -e --noscripts </code></pre>

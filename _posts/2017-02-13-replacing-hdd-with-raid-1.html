@@ -1,0 +1,65 @@
+---
+layout: post
+title: Replacing Hardisk RAID 1 Level OS
+author: Galuh D Wijatmiko
+categories: [StorageAndFilesystem]
+tags: [Service,Storage]
+---
+
+<p>1. check /dev/sdb failed -&gt; sdbX | sdaX [U_] (f)<!--more--></p>
+<p>2. change status fail for sdbX</p>
+<blockquote><p>
+<span style="color: #800000;">mdadm --manage /dev/md0 --fail /dev/sdb1</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md1 --fail /dev/sdb2</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md2 --fail /dev/sdb3</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md3 --fail /dev/sdb5</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md4 --fail /dev/sdb6</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md5 --fail /dev/sdb7</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md6 --fail /dev/sdb8</span>
+</p></blockquote>
+<p>3. Hot remove sdbX</p>
+<blockquote><p><span style="color: #800000;">mdadm --manage /dev/md0 --remove /dev/sdb1</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md1 --remove /dev/sdb2</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md2 --remove /dev/sdb3</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md3 --remove /dev/sdb5</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md4 --remove /dev/sdb6</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md5 --remove /dev/sdb7</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md6 --remove /dev/sdb8</span></p></blockquote>
+<p>4. Stop All service</p>
+<p>5. Shutdown Server, and change hardsik (this is condition if server same as PC)</p>
+<p>6. Check HDD Information</p>
+<pre><code>smartctl -i /dev/sda</code></pre>
+<blockquote><p><span style="color: #800000;"> === START OF INFORMATION SECTION ===</span><br />
+<span style="color: #800000;">Model Family:     Seagate Barracuda (SATA 3Gb/s, 4K Sectors)</span><br />
+<span style="color: #800000;">Device Model:     ST1000DM003-1CH162</span><br />
+<span style="color: #800000;">Serial Number:    Z1D3FMSW</span><br />
+<span style="color: #800000;">LU WWN Device Id: 5 000c50 04fc820e0</span><br />
+<span style="color: #800000;">Firmware Version: CC44</span><br />
+<span style="color: #800000;">User Capacity:    1.000.204.886.016 bytes [1,00 TB]</span><br />
+<span style="color: #800000;">Sector Sizes:     512 bytes logical, 4096 bytes physical</span><br />
+<span style="color: #800000;">Device is:        In smartctl database [for details use: -P show]</span><br />
+<span style="color: #800000;">ATA Version is:   8</span><br />
+<span style="color: #800000;">ATA Standard is:  ATA-8-ACS revision 4</span><br />
+<span style="color: #800000;">Local Time is:    Wed Dec 21 02:59:39 2016 GMT</span><br />
+<span style="color: #800000;">SMART support is: Available - device has SMART capability.</span><br />
+<span style="color: #800000;">SMART support is: Enabled</span></p>
+<pre><code><span style="color: #800000;">smartctl -i /dev/sdb</span></code></pre>
+<p><span style="color: #800000;">smartctl 5.43 2012-06-30 r3573 [x86_64-linux-2.6.32-504.30.3.el6.x86_64] (local build)</span></p>
+<blockquote><p><span style="color: #800000;">Copyright (C) 2002-12 by Bruce Allen, http://smartmontools.sourceforge.net</span></p>
+<p><span style="color: #800000;">Vendor:               /3:0:0:0</span><br />
+<span style="color: #800000;">Product:              </span><br />
+<span style="color: #800000;">&gt;&gt; Terminate command early due to bad response to IEC mode page</span><br />
+<span style="color: #800000;">A mandatory SMART command failed: exiting. To continue, add one or more '-T permissive' options.</span></p></blockquote>
+<p>7. Create 7 Partation with FS TYPE linux_raid_member</p>
+<pre class="western"><span style="color: #800000;">sfdisk -d /dev/sda | sfdisk /dev/sdb</span></pre>
+<p>8. add /dev/sdbX to raid mdX</p>
+<blockquote><p><span style="color: #800000;">mdadm --manage /dev/md0 --add /dev/sdb1</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md1 --add /dev/sdb2</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md2 --add /dev/sdb3</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md3 --add /dev/sdb5</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md4 --add /dev/sdb6</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md5 --add /dev/sdb7</span><br />
+<span style="color: #800000;">mdadm --manage /dev/md6 --add /dev/sdb8</span></p></blockquote>
+<p>9. wait rsync, and monitorig</p>
+<pre class="western"><span style="color: #800000;">watch "cat /proc/mdstat" </span></pre>
+</blockquote>

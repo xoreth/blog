@@ -1,0 +1,34 @@
+---
+layout: post
+title: Install and Run Vagrant
+author: Galuh D Wijatmiko
+categories: [Provisioning]
+tags: [installation,centos7,vagrant]
+---
+
+<p><strong>Install Vagrant</strong><br />
+Download https://www.vagrantup.com/downloads.html</p>
+<p>debian/ubuntu installation :</p>
+<blockquote><p>dpkg -i vagrant_*_x86_64.deb</p></blockquote>
+<p><!--more--></p>
+<p>Centos/redhat/fedora installation :</p>
+<blockquote><p>rpm -i vagrant_*_x86_64.rpm</p></blockquote>
+<p><strong>Running up CENTOS 7 </strong><br />
+Listing box vagrant</p>
+<blockquote><p>vagrant box list<br />
+bento/centos-7.2 (virtualbox, 2.3.1)</p></blockquote>
+<p>Generate vagrant config file :</p>
+<blockquote><p>vagrant init bento/centos-7.2</p></blockquote>
+<p>this command will download vm.box.</p>
+<p>Install vagrant plugin host and ruby highline(for hide password text)</p>
+<blockquote><p>vagrant plugin install vagrant-hostmanager<br />
+vagrant plugin install highline</p></blockquote>
+<p>To running</p>
+<blockquote><p>vagrant up</p></blockquote>
+<p>modify  user password ssh vagrant, edit line in file Vagrantfile :</p>
+<blockquote><p>config.ssh.username = "root"<br />
+config.ssh.password = "vagrant"</p></blockquote>
+<p>next step,  reload config :</p>
+<blockquote><p>vagrant provision ad7454e</p></blockquote>
+<p>to get id ad7454e vm :</p>
+<blockquote><p>vagrant global-status</p></blockquote>

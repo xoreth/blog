@@ -1,0 +1,33 @@
+---
+layout: post
+title: Alias TTY USB With UDEV
+author: Galuh D Wijatmiko
+categories: [Server]
+tags: [Service,udev]
+---
+
+<p>[1] listing ID PATH and printing USB</p>
+<p>for i in `ls /dev/ttyUSB*`; do a=`udevadm info –query=property –name  $i | grep ID_PATH | tr -d “ID_PATH=”`; echo $a" “$i;done<!--more--></p>
+<p>pci-0000:00:1a.0-usb-0:1.5.1:1.0 /dev/ttyUSB0<br />
+pci-0000:00:1a.0-usb-0:1.5.1:1.1 /dev/ttyUSB1<br />
+pci-0000:00:1a.0-usb-0:1.5.1:1.2 /dev/ttyUSB2<br />
+pci-0000:00:1a.0-usb-0:1.5.1:1.3 /dev/ttyUSB3<br />
+pci-0000:00:1a.0-usb-0:1.5.2:1.0 /dev/ttyUSB4<br />
+pci-0000:00:1a.0-usb-0:1.5.2:1.1 /dev/ttyUSB5<br />
+pci-0000:00:1a.0-usb-0:1.5.2:1.2 /dev/ttyUSB6<br />
+pci-0000:00:1a.0-usb-0:1.5.2:1.3 /dev/ttyUSB7</p>
+<p>[2] Make file on /etc/udev/rules.d/usb-syslink.rules</p>
+<p>SUBSYSTEM=="tty”, ENV{ID_PATH}==“pci-0000:00:1a.0-usb-0:1.5.1:1.0”, SYMLINK+=“/dev/ttyUSB0”<br />
+SUBSYSTEM==“tty”, ENV{ID_PATH}==“pci-0000:00:1a.0-usb-0:1.5.1:1.1”, SYMLINK+=“/dev/ttyUSB1”<br />
+SUBSYSTEM==“tty”, ENV{ID_PATH}==“pci-0000:00:1a.0-usb-0:1.5.1:1.2”, SYMLINK+=“/dev/ttyUSB2”<br />
+SUBSYSTEM==“tty”, ENV{ID_PATH}==“pci-0000:00:1a.0-usb-0:1.5.1:1.3”, SYMLINK+=“/dev/ttyUSB3”<br />
+SUBSYSTEM==“tty”, ENV{ID_PATH}==“pci-0000:00:1a.0-usb-0:1.5.2:1.0”, SYMLINK+=“/dev/ttyUSB4”<br />
+SUBSYSTEM==“tty”, ENV{ID_PATH}==“pci-0000:00:1a.0-usb-0:1.5.2:1.1”, SYMLINK+=“/dev/ttyUSB5”<br />
+SUBSYSTEM==“tty”, ENV{ID_PATH}==“pci-0000:00:1a.0-usb-0:1.5.2:1.2”, SYMLINK+=“/dev/ttyUSB6”<br />
+SUBSYSTEM==“tty”, ENV{ID_PATH}==“pci-0000:00:1a.0-usb-0:1.5.2:1.3”, SYMLINK+=“/dev/ttyUSB7”</p>
+<p>[3] Reload udev<br />
+udevadm control –reload-rules<br />
+or<br />
+udevadm trigger<br />
+or<br />
+sudo udevadm trigger –attr-match=subsystem=tty</p>

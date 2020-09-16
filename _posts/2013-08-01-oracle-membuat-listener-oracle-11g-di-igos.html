@@ -1,0 +1,27 @@
+---
+layout: post
+title: "[Oracle  11 G] Membuat Listener Oracle 11G"
+author: Galuh D Wijatmiko
+categories: [Databases]
+tags: [oracle,database]
+---
+
+
+<p>membuat listener #oracle di #igosnusantara</p>
+<p>disable    host :<br />
+<strong>xhost +</strong></p>
+<p>masuk ke user oracle :<br />
+<strong>su oracle</strong><!-- more --></p>
+<p>lalu membuat listener  :<br />
+<strong>netca</strong></p>
+<p>Oracle Net Configuration Assistant<br />
+[1] listener configuration, next<br />
+[2] add, next<br />
+[3] berikan nama untuk listener, disini    menggunakan LISTENER<br />
+[4] pilih protokol tcp,    next<br />
+[5] tentukan port, gunakan port    standar    1521<br />
+[6] pilih opsi no, next<br />
+[7] next<br />
+[8] finish</p>
+<p>mengecek apakah    listener sudah bisa dijalankan :<br />
+<strong>lsnrctl start</strong></p>

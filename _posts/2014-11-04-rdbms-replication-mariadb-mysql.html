@@ -1,0 +1,121 @@
+---
+layout: post
+title: RDBMS Replication Master to Slave Mariadb
+author: Galuh D Wijatmiko
+categories: [Databases]
+tags: [mysql,replication]
+---
+
+<p>Master : 192.168.56.1 (Slackware) Mariadb<br />
+Slave : 192.168.56.3 (Centos) Mysql</p>
+<p>Master and Slave make sure it is <strong>connected.</strong><br />
+<!-- more --><br />
+<strong>ON MASTER</strong><br />
+Create Log For System Master<br />
+<em># mkdir -p /var/log/mysql</em><br />
+<em># touch /var/log/mysql/mysql-wjt.log</em><!--more--></p>
+<p>Enable Logbin<br />
+<em>#mysql -u root -p -e ‘SET sql_log_bin = 1’</em></p>
+<p>Copy full parameter configuration if my.cnf is blank configure<br />
+<em>#cp  /usr/share/mysql/my-large.cnf /etc/my.cnf</em></p>
+<p>Configure MASTER<strong> /etc/my.cnf</strong><br />
+<em>#skip-networking</em><br />
+<em># bind-address  = 127.0.0.1</em><br />
+<em>log-bin = /var/log/mysql/mysql-wjt.log</em><br />
+<em>binlog_format=row</em><br />
+<em>binlog-do-db=gratika</em><br />
+<em>server-id    = 1</em></p>
+<p>Restart mysql service<br />
+<em>#/etc/rc.d/rc.mysqld start</em></p>
+<p>create a new user MySQL database that will be entitled to replication<br />
+<em>#mysql -u root -p -e ‘GRANT REPLICATION SLAVE ON *.* TO ‘replikasi’@’%’ IDENTIFIED BY '228844'’’;</em></p>
+<p><em>#mysql -u root -p -e 'FLUSH PRIVILEGES’;</em></p>
+<p>Database will by replication<br />
+<em>#mysql -u root -p -e 'USE gratika’;</em><br />
+<em>#mysql -u root -p -e ‘FLUSH TABLES WITH READ LOCK’;</em></p>
+<p>And see logbin<br />
+<em>#mysql -u root -p -e 'SHOW MASTER STATUS’</em><br />
+Enter password:<br />
++——————+———-+————–+——————+<br />
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB |<br />
++——————+———-+————–+——————+<br />
+| mysql-wjt.000001 |      320 | gratika      |                  |<br />
++——————+———-+————–+——————+</p>
+<p>Unlcok tables<br />
+<em>#mysql -u root -p -e ‘UNLOCK TABLES’’</em><br />
+<em>#mysql -u root -p -e 'FLUSH PRIVILEGES’;</em></p>
+<p>Export database gratika for use on slave, purpose database have same between Master and Slave.<br />
+<em>#mysqldump -u root -p gratika &gt; ~/gratika_slave.wjt</em></p>
+<p>Copy database gratika to server slave<br />
+<em>#scp gratika_slave.wjt replikasi@192.168.56.3:/home/replikasi/</em></p>
+<p><strong>ON SLAVE</strong><br />
+Create database<br />
+<em>#mysql -u root -p -e 'create database gratika’</em></p>
+<p>Import database<br />
+<em>mysql -u root -p gratika &lt; ~/gratika_slave.wjt</em></p>
+<p>If mariadb or mysql version under 5.3, setting can configure on <strong>/etc/my.cnf</strong></p>
+<p><em>server-id=2</em><br />
+<em>master-host=192.168.56.1</em><br />
+<em>master-user=replikasi</em><br />
+<em>master-password=228844</em><br />
+<em>master-connect-retry=60</em><br />
+<em>replicate-do-db=gratika</em></p>
+<p>Else using mariadb or mysql above 5.5 using<br />
+<em>#mysql -u root -p -e 'STOP SLAVE’</em>;<br />
+<em>#mysql -u root -p -e 'CHANGE MASTER TO MASTER_HOST='192.168.56.1’, MASTER_USER='replikasi’, MASTER_PASSWORD='228844’, MASTER_PORT=3306, MASTER_CONNECT_RETRY=60, MASTER_LOG_FILE='mysql-wjt.000001’, MASTER_LOG_POS=320’;</em><br />
+<em>#mysql -u root -p -e 'START SLAVE’</em>;</p>
+<p>If there many error example :<br />
+ERROR 1201 (HY000): Could not initialize master info structure; more error messages can be found in the MariaDB error log</p>
+<p>Solving :<br />
+<em>#mysql -u root -p -e 'RESET SLAVE’</em></p>
+<p><em>and next flush privileges</em></p>
+<p><em>#mysql -u root -p -e ’FLUSH PRIVILEGES’</em><br />
+On two method check server_id on mysqsql, it must be same with <strong>/etc/my.cnf</strong></p>
+<p><em>#grep server-id /etc/my.cnf</em><br />
+server-id=2</p>
+<p><em>mysql&gt; SHOW VARIABLES LIKE 'server_id’;</em><br />
+<em>Value must be 2;</em></p>
+<p>Check status :<br />
+<em>#mysql -u root -p -e 'show slave statusG</em></p>
+<p>Enter password:<br />
+*************************** 1. row ***************************<br />
+Slave_IO_State: Waiting for master to send event<br />
+Master_Host: 192.168.56.1<br />
+Master_User: replikasi<br />
+Master_Port: 3306<br />
+Connect_Retry: 60<br />
+Master_Log_File: mysql-wjt.000001<br />
+Read_Master_Log_Pos: 320<br />
+Relay_Log_File: localhost-relay-bin.000002<br />
+Relay_Log_Pos: 529<br />
+Relay_Master_Log_File: mysql-wjt.000001<br />
+Slave_IO_Running: Yes<br />
+Slave_SQL_Running: Yes<br />
+Replicate_Do_DB:<br />
+Replicate_Ignore_DB:<br />
+Replicate_Do_Table:<br />
+Replicate_Ignore_Table:<br />
+Replicate_Wild_Do_Table:<br />
+Replicate_Wild_Ignore_Table:<br />
+Last_Errno: 0<br />
+Last_Error:<br />
+Skip_Counter: 0<br />
+Exec_Master_Log_Pos: 320<br />
+Relay_Log_Space: 827<br />
+Until_Condition: None<br />
+Until_Log_File:<br />
+Until_Log_Pos: 0<br />
+Master_SSL_Allowed: No<br />
+Master_SSL_CA_File:<br />
+Master_SSL_CA_Path:<br />
+Master_SSL_Cert:<br />
+Master_SSL_Cipher:<br />
+Master_SSL_Key:<br />
+Seconds_Behind_Master: 0<br />
+Master_SSL_Verify_Server_Cert: No<br />
+Last_IO_Errno: 0<br />
+Last_IO_Error:<br />
+Last_SQL_Errno: 0<br />
+Last_SQL_Error:<br />
+Replicate_Ignore_Server_Ids:<br />
+Master_Server_Id: 1</p>

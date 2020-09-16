@@ -1,0 +1,19 @@
+---
+layout: post
+title: Add Box Vagrant From Virtualbox
+author: Galuh D Wijatmiko
+categories: [Provisioning,Virtualization]
+tags: [vagrant,automation]
+---
+
+<p>1. Listing image</p>
+<pre><code>VBoxManage list vms</code></pre>
+<p>output</p>
+<pre><code>"CentOS6.7" {59051034-c1c8-44cb-b985-cd641b790690}</code></pre>
+<p><!--more--><br />
+2. Create package</p>
+<pre><code>vagrant package --base 59051034-c1c8-44cb-b985-cd641b790690 --output centos.box</code></pre>
+<p>3. add to vagrant</p>
+<pre><code>vagrant box add centos.box --name centos</code></pre>
+<p>4. Check vagrant box</p>
+<pre><code>vagrant box list</code></pre>

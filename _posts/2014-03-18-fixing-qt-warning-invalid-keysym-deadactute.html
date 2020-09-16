@@ -1,0 +1,11 @@
+---
+layout: post
+title: "Fixing QT Warning Invalid Keysym dead_actute at Slackware"
+author: Galuh D Wijatmiko
+categories: [Troubleshot]
+tags: [Slwackware]
+---
+
+
+<pre><code>sudo sed -i -e 's/dead_actute/dead_acute/' /usr/share/X11/locale/en_US.UTF-8/Composed
+</code></pre>

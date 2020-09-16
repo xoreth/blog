@@ -1,0 +1,19 @@
+---
+layout: post
+title: Enable Telnet In linux
+author: Galuh D Wijatmiko
+categories: [SecurityTunningAndHardening]
+tags: [telnet,centos7,installation]
+---
+
+> Not Recommended
+
+<p>1. Check package telnet, with slack-utils.<!--more--></p>
+<p>sll telnet</p>
+<p>2. On Package inetd, uncheck # telnet</p>
+<p>sudo vi  /etc/inetd.conf</p>
+<p>telnet    stream  tcp     nowait  root    /usr/sbin/tcpd    in.telnetd</p>
+<p>3. Restart inetd</p>
+<p>sudo inetd -d</p>
+<p>4. Testing localhost telnet</p>
+<p>telnet 127.0.0.1</p>

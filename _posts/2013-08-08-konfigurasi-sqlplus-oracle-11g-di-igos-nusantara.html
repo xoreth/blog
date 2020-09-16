@@ -1,0 +1,25 @@
+---
+layout: post
+title: "[Oracle  11 G] Konfigurasi SQLPLUS"
+author: Galuh D Wijatmiko
+categories: [Databases]
+tags: [oracle,database]
+---
+
+<p>Konfigurasi #sqlplus #oracle 11g di #igosnusantara</p>
+<p>tools client oracle 11g sqlplus tidak bisa diarahkan keatas dan tidak mempunyai tab completion.<!-- more --><br />
+Solusi :<!--more--></p>
+<p><strong>sudo yum install rlwrap</strong></p>
+<p>setalah    itu masuk ke user oracle,<br />
+#noted<br />
+<em><a href="http://blog.wajatmaka.com/post/57150322864/oracleindex-1-instalasi-konfigurasi-servis-oracle-11g">http://blog.wajatmaka.com/post/57150322864/oracleindex-1-instalasi-konfigurasi-servis-oracle-11g</a></em></p>
+<p>lalu membuat KAMUS untuk tab completion    di <em><strong>/home/oracle/</strong></em><br />
+<strong>nano ~/.library1.dat</strong></p>
+<p><em>SELECT FROM ORDER WHERE JOIN TABLE VIEW PACKAGE PROCEDURE FUNCTION IDENTIFIED BY GROUP ALTER DELETE INSERT UPDATE</em><br />
+<em>SHOW DESCRIBE ON ALL IN  INTO</em></p>
+<p>lalu buat history sqlplus<br />
+<strong>touch ~/.sqlplus_history   </strong></p>
+<p>Setelah membuat    kamus dan history, buat env alias untuk sqlplus di <em><strong>/home/oracle/.zshrc</strong></em> atau <em><strong>/home/oracle/.bashrc</strong></em></p>
+<p><em>alias sqlplus=‘rlwrap -i -f ~/.library1.dat sqlplus’</em></p>
+<p>lalu masuk ke sqlplus. temporari perintah dapat    diarahkan dengan keyboard arah atas,<br />
+dan dapat melakukan tab    completion dengan menekan tab dua kali.</p>

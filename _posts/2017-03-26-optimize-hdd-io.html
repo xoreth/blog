@@ -1,0 +1,17 @@
+---
+layout: post
+title: Optimize IO Hardisk
+author: Galuh D Wijatmiko
+categories: [SecurityTunningAndHardening,'StorageAndFilesystem']
+tags: [KernelOptimize]
+---
+
+<p>add /etc/sysctl.conf</p>
+<blockquote><p>
+vm.dirty_ratio = 6<br />
+vm.dirty_background_ratio = 3<br />
+vm.vfs_cache_pressure = 50<br />
+vm.swappiness = 1</p></blockquote>
+<p>load sysctl -p</p>
+<p>add /etc/udev/rules.d/10-local.rules</p>
+<blockquote><p>ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="deadline"</p></blockquote>

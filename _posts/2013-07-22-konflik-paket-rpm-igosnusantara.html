@@ -1,0 +1,17 @@
+---
+layout: post
+title: "Force Package Conflict RPM Base"
+author: Galuh D Wijatmiko
+categories: [Packaging]
+tags: [RPM,package]
+---
+
+<p>Misal nama file yang mendapatkan konflik adalah filesystem, file binary executable elf pada /usr/bin/ adalah sama dengan file yg terdapat pada paket net-tools. untuk melihat daftar file pada nama paket  :<!-- more --></p>
+<p><strong>rpm -ql namaPaket | less</strong></p>
+<p>dan untuk melihat file-file rpm yang akan diinstallkan (konflik)</p>
+<p><strong>rpm -qpl /direktoridimanapaketberada/namapaket | less</strong></p>
+<p>Untuk install agar file yang konflik dapat ditangani maka :<br />
+<strong>rpm --force -i /direktoridimanapaketberada/namapaket</strong></p>
+<ul>
+<li>#warning : bersifat replace, menindih, file lama akan terhapus.</li>
+</ul>

@@ -1,0 +1,12 @@
+---
+layout: post
+title: Check Application Used Memory
+author: Galuh D Wijatmiko
+categories: [Script]
+tags: [Hardening,Script]
+---
+
+<p>Spesific, check java app:</p>
+<blockquote><p>ps aux|grep java | grep -v grep | awk '{app+=$6} END {printf"%.1f MB",app/1024}'</p></blockquote>
+<p>global OS :</p>
+<blockquote><p>ps aux| awk '{app+=$6} END {printf"%.1f MB",app/1024}'</p></blockquote>

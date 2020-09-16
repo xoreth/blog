@@ -1,0 +1,50 @@
+---
+layout: post
+title: "[Python2] Format String"
+author: Galuh D Wijatmiko
+categories: [Programming]
+tags: [python2]
+---
+
+<p>Tujuan untuk mencetak string dan dipadukan dengan beberapa variable sesuai format yang diinginkan.</p>
+<p>Contoh :<!--more--></p>
+<p>jam=5<br />
+puluhan=jam%10<br />
+satuan=jam//10<br />
+<!-- more --><br />
+print “membuat format jam 05:00”<br />
+print  satuan, puluhan<br />
+print satuan, puluhan,“:00”<br />
+print “satuan+pilihan:00”<br />
+print str(satuan),str(puluhan),“:00”<br />
+print str(satuan)+str(puluhan)+“:00”<br />
+print “sekarang adalah pukul”,str(satuan)+str(puluhan)+“:00n”<br />
+print “puluhan adalah %i”%(puluhan)</p>
+<p><strong>Output :</strong><br />
+membuat format jam 05:00<br />
+0 5<br />
+0 5 :00<br />
+satuan+pilihan:00<br />
+0 5 :00<br />
+05:00<br />
+sekarang adalah pukul 05:00</p>
+<p>puluhan adalah 5</p>
+<p>Adapun string formatter seperti halnya bahasa c dan c++, adalah sebagai berikut :</p>
+<p>namax = “dwiyan galuh w”<br />
+print  “%s akan pergi pukul %i%i:00”%(namax,satuan,puluhan)</p>
+<p>ab = 3.000012123<br />
+print “%i %d %f”%(ab,ab,ab)</p>
+<p><strong>Output :</strong><br />
+dwiyan galuh w akan pergi pukul 05:00<br />
+3 3 3.000012</p>
+<p>String formatter pada python [0]:<br />
+%c mencetak karakter<br />
+%s mencetak dari jenis apapun maupun string<br />
+%i,%d mencetak angka desimal bertanda<br />
+%u mencetak angka desimal tak bertanda<br />
+%o mencetak angka oktal<br />
+%x,%X mencetak angka heksa dan besar<br />
+%f mencetak angka real berkoma<br />
+%e,%E mencetak eskponensial<br />
+%g,%G mencetak desimal dengan angka di belakang koma lebih pendek.</p>
+<p>[0] Belajar pemrograman python dasar UPI, Ebook.</p>

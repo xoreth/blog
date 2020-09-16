@@ -1,0 +1,93 @@
+---
+layout: post
+title: Monit Configuration 
+author: Galuh D Wijatmiko
+categories: [Server]
+tags: [monit,Service]
+---
+
+<blockquote>
+<strong>cassandra</strong><br />
+check process cassandra with pidfile /var/run/cassandra/cassandra.pid<br />
+ start program = "/etc/init.d/cassandra start"<br />
+ stop program = "/etc/init.d/cassandra stop"
+</p></blockquote>
+<p><!--more--></p>
+<blockquote><p>
+<strong>vsftpd</strong><br />
+check process vsftpd<br />
+ matching vsftpd<br />
+ start program = "/etc/init.d/vsftpd start"<br />
+ stop program = "/etc/init.d/vsftpd stop"
+</p></blockquote>
+<blockquote><p>
+<strong>mysql</strong><br />
+ check process mysqld with pidfile /var/run/mysqld/mysqld.pid<br />
+   group database<br />
+   group mysql<br />
+   start program = "/etc/init.d/mysql start"<br />
+   stop  program = "/etc/init.d/mysql stop"<br />
+   if failed host localhost port 3306 protocol mysql with timeout 15 seconds for 3 times within 4 cycles then restart<br />
+   if failed unixsocket /var/run/mysqld/mysqld.sock protocol mysql for 3 times within 4 cycles then restart<br />
+   if 5 restarts with 5 cycles then timeout<br />
+   depend mysql_bin<br />
+   depend mysql_rc</p>
+<p> check file mysql_bin with path /usr/sbin/mysqld<br />
+   group mysql<br />
+   include /etc/monit/templates/rootbin</p>
+<p> check file mysql_rc with path /etc/init.d/mysql<br />
+   group mysql<br />
+   include /etc/monit/templates/rootbin
+</p></blockquote>
+<blockquote><p>
+<strong>rabbitmq</strong><br />
+check process rabbitmq with pidfile /var/run/rabbitmq.pid<br />
+  start program = "/etc/init.d/rabbitmq-server start"<br />
+  stop program = "/etc/init.d/rabbitmq-server stop"
+</p></blockquote>
+<blockquote><p>
+<strong>fail2ban</strong><br />
+check process fail2ban with pidfile /var/run/fail2ban/fail2ban.pid<br />
+    group services<br />
+    start program = "/etc/init.d/fail2ban force-start"<br />
+    stop  program = "/etc/init.d/fail2ban stop"<br />
+    if failed unixsocket /var/run/fail2ban/fail2ban.sock then restart<br />
+    if 5 restarts within 5 cycles then timeout</p>
+<p>check file fail2ban_log with path /var/log/fail2ban.log<br />
+    if match "ERROR|WARNING" then alert
+</p></blockquote>
+<blockquote><p>
+<strong>greenbone</strong><br />
+check process greenbone with pidfile /var/run/gsad.pid<br />
+   start program  "/etc/init.d/greenbone-security-assistant start"<br />
+   stop program  "/etc/init.d/greenbone-security-assistant stop"<br />
+   if failed port 80 then restart
+</p></blockquote>
+<blockquote><p>
+<strong>nessusd</strong><br />
+check process nessusd  with pidfile /opt/nessus/var/nessus/nessus-service.pid<br />
+   start program  "/etc/init.d/nessusd start"<br />
+   stop program  "/etc/init.d/nessusd stop"<br />
+   if failed port 8834 then restart
+</p></blockquote>
+<blockquote><p>
+<strong>openvasmd</strong><br />
+check process openvasmd with pidfile /var/run/openvasmd.pid<br />
+   start program  "/etc/init.d/openvas-manager start"<br />
+   stop program  "/etc/init.d/openvas-manager stop"<br />
+   if failed port 9390 then restart
+</p></blockquote>
+<blockquote><p>
+<strong>openvassd</strong><br />
+check process openvassd with pidfile /var/run/openvassd.pid<br />
+   start program  "/etc/init.d/openvas-scanner start"<br />
+   stop program  "/etc/init.d/openvas-scanner stop"<br />
+   if failed port 9391 then restart
+</p></blockquote>
+<blockquote><p>
+<strong>yule</strong><br />
+check process yule with pidfile /var/run/yule.pid<br />
+   start program  "/etc/init.d/yule start"<br />
+   stop program  "/etc/init.d/yule stop"<br />
+   if failed port 49777 then restart
+</p></blockquote>

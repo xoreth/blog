@@ -1,0 +1,37 @@
+---
+layout: post
+title: "[Oracle  11 G] Membuat Database Oracle"
+author: Galuh D Wijatmiko
+categories: [Databases]
+tags: [oracle,database]
+---
+
+<p>membuat database #oracle di #igosnusantara</p>
+<p>ubah <strong>/etc/hosts</strong>, ubah localhost    menjadi    igosnusantara<br />
+<em>127.0.0.1               localhost.localdomain  igosnusantara</em></p>
+<p>#note menjaga listener tidak berfungsi, karena di environment telah di set host nya bukan localhost/127.0.0.1 melainkan HOST=igosnusantara<!-- more --></p>
+<p>disable    host :<br />
+<strong>xhost +</strong></p>
+<p>masuk ke user oracle :<br />
+<strong>su oracle</strong></p>
+<p>jalnkan    listener :<br />
+<strong>lsnrctl start</strong></p>
+<p>#note cara membuat listener <a href="http://blog.wajatmaka.com/post/57059655515/membuat-listener-oracle-11g-di-igos-nusantara">http://blog.wajatmaka.com/post/57059655515/membuat-listener-oracle-11g-di-igos-nusantara</a></p>
+<p>jalankan Database Configuration Assitant :<br />
+<strong>dbca</strong></p>
+<p>[1]next<br />
+[2]create database, next<br />
+[3]pilih ‘general purpose and transaction processing, next<br />
+[4]isi :<br />
+global database name : basedata<br />
+ID : basedata<br />
+#note : disesuaikan dengan environment yang telah dicantumkan /etc/profile atau /home/oracle/.zshrc atau .bashrc<br />
+next<br />
+[5]ceklist configure enterprise manager, next<br />
+[6]pilih use the same administrative password for All accounts,    isi password, next<br />
+[7]next<br />
+[8]ceklis specify flash    recovery area<br />
+[9]ceklis sample schemas<br />
+[10]atur konfigurasi ram sesuai kebutuhan anda, sistem.    next<br />
+[11]Dokumentasi, next<br />
+[12]ceklis create database, finish</p>

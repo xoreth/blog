@@ -1,0 +1,50 @@
+---
+layout: post
+title: STDIN and ATDOUT Bash
+author: Galuh D Wijatmiko
+categories: [Script]
+tags: [bash,script]
+---
+<p>Diagram Process</p>
+<p><em>stdin-&gt;process-&gt;stdout</em></p>
+<p>1.Stdin (Input)</p>
+<p>stdin 0 Read input from a file<br />
+<code>example :</code></p>
+<p><code>cat <strong>&lt;</strong> file</code></p>
+<p>2. Stdout (Output)</p>
+<p>stdout 1 Send data to a file (write).<br />
+<code>example :</code></p>
+<p><code>date <strong>&gt;</strong> output.txt<br />
+cat output.txt</code></p>
+<p>3. Stderr(Process)</p>
+<p>Stderr 2 Send all error messages in default screen to a file. usually error message when porcess take place.<br />
+<code>example :</code></p>
+<p><code>rm /tmp/test.txt <strong>2&gt;</strong> error.txt<br />
+cat error.txt<!-- more --></code></p>
+<p>How to direct ouput unwanted?</p>
+<p>error message usually there on default screen, if we don’t want error message or message view on screen terminal, we get to throw to device file unix like on /dev/null or /dev/zero</p>
+<p>example :</p>
+<p>1. remove error message on view</p>
+<p>command 2&gt;/dev/null</p>
+<p>2. remove message output on view</p>
+<p>command &gt;/dev/null</p>
+<p>DIrections EOF (End Of File)</p>
+<p>Example :</p>
+<p><span class="kw2">wc</span> <span class="re5">-w</span> <span class="sy0">&lt;&lt;</span>EOF</p>
+<p><span class="sy0">&gt;</span> This is a test.</p>
+<p><span class="sy0">&gt;</span> Apple juice.</p>
+<p><span class="sy0">&gt;</span> <span class="nu0">100</span><span class="sy0">%</span> fruit juice and no added sugar, colour or preservative.</p>
+<p><span class="sy0">&gt;</span> EOF</p>
+<p>Direction read string</p>
+<p>Example :</p>
+<p><span class="kw2">wc</span> <span class="re5">-w</span> <span class="sy0">&lt;&lt;&lt;</span>“coba test”</p>
+<p>grep galuh &lt;&lt;&lt;“galuh tampan sekali”</p>
+<p>Direction with other File Descriptor</p>
+<p>exec 3&lt; /etc/resolv.conf<br />
+cat &lt;&amp;3<br />
+output : nameserver 192.168.42.129</p>
+<p>remove directions<br />
+exec 3&lt;&amp;-<br />
+cat &lt;&amp;3<br />
+ouput : zsh: 3: bad file descriptor</p>
+<p>&nbsp;</p>

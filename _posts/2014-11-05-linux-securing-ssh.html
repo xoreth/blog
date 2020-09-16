@@ -1,0 +1,44 @@
+---
+layout: post
+title: Make Secure SSH
+author: Galuh D Wijatmiko
+categories: [SecurityTunningAndHardening]
+tags: [ssh]
+---
+<p><strong>[1] Using Protcol 2, Default is protocol 1. /etc/ssh/sshd_config</strong><!--more--></p>
+<p>Protocol 2</p>
+<p><strong>[2]Spesific Address Listen, Active</strong></p>
+<p><strong>[3]Disable Direct root on ssh</strong></p>
+<p>PermitRootLogin no</p>
+<p><strong>[4]Disable empty Password</strong></p>
+<p>PermitEmptyPassword no<!-- more --></p>
+<p><strong>[5]Logout user after 15 minute if idle timeout</strong></p>
+<p>ClientAliveInterval 900<br />
+ClientAliveCountMax 0</p>
+<p><strong>[6]Minimalitation attack brute force, LoginGraceTime</strong></p>
+<p>LoginGraceTime 30</p>
+<p><strong>[7]Change Port</strong></p>
+<p>Port 1991</p>
+<p><strong>[8]Allow only user</strong></p>
+<p>AllowUsers replikasi wajatmaka</p>
+<p><strong>[9]restrict access to TCP services based on IP on TCP wrappers</strong></p>
+<p>before check libwrap,</p>
+<p>ldd /usr/sbin/sshd | grep libwrap<br />
+sshd: 192.168.56.1/255.255.255.240 : allow<br />
+sshd: 192.168.56.1 : allow</p>
+<p><strong>[10]Using iptables for permit restrict accsess</strong></p>
+<p>#iptables -N SSH_RULE_WAJATMAKA<br />
+#iptables -A INPUT -p tcp –dport 1991 -m state –state NEW -j SSH_RULE_WAJATMAKA<br />
+#iptables -A SSH_RULE_WAJATMAKA -m recent –set –name SSH<br />
+#iptables -A SSH_RULE_WAJATMAKA -m recent –update –seconds 60 –hitcount 4 –name SSH -j DROP</p>
+<p>#iptables -L</p>
+<p>output:</p>
+<p>Chain SSH_RULE_WAJATMAKA (1 references)<br />
+target     prot opt source               destination<br />
+all  –  anywhere             anywhere             recent: SET name: SSH side: source mask: 255.255.255.255<br />
+DROP       all  –  anywhere             anywhere             recent: UPDATE seconds: 60 hit_count: 4 name: SSH side: source mask: 255.255.255.255</p>
+<p><strong>[11]Using Strong Password </strong></p>
+<p>Set criteria password on PAM (the “pluggable authentication module”) /etc/pam.d/system-auth</p>
+<p><strong>[12]</strong><strong>Use Private/Public Keys for SSH authentication</strong></p>
+<p><strong>[13]Update Openssh Package</strong></p>
+<pre class="alt2">PermitEmptyPasswords no</pre>

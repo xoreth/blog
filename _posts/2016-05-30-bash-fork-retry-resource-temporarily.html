@@ -1,0 +1,35 @@
+---
+layout: post
+title: Bash Fork Retry Resoucrce Temporary
+author: Galuh D Wijatmiko
+categories: [Troubleshot]
+tags: [Service]
+---
+
+<p>This is commonly caused by running out of file descriptors.</p>
+<p>There are different file descriptor limits.</p>
+<p>There is the systems total file descriptor limit, what do you get from the command:<br />
+CODE: SELECT ALL<br />
+sysctl fs.file-nr<!--more--></p>
+<p>From this command you will get 3 numbers. First is the number of used file descriptor the second is the number of allocated but not used file descriptor and the last is the system max file descriptor. If either of the first two numbers are new otr at the third you need to increase the number of file descriptors for the system of find out what is consuming them.</p>
+<p>If the total of the used system file descriptors is not near the max it may be a user limit.</p>
+<p>To find out what a users file descriptor limit is run the commands:<br />
+CODE: SELECT ALL<br />
+sudo su - UID<br />
+ulimit -Hn</p>
+<p>Replace UID with the user ID is the user you want to check, or if you are already logged in as that user just run the ulimit command.</p>
+<p>To find out how many file descripters are in use by a user run the command:<br />
+CODE: SELECT ALL<br />
+lsof -u UID 2&gt;/dev/null | wc -l</p>
+<p>So now if you are having a system file descriptor limit issue you will need to edit your /etc/sysctl.conf file and add, or modify it it already exists, a line with fs.file-max and set it to a value large enough to deal with the number of file descriptors you need and reboot.</p>
+<p>The line would look somehting like:<br />
+CODE: SELECT ALL<br />
+fs.file-max = 204708</p>
+<p>If it is a individual users file descriptor limit then you will have to update the users limits in the /etc/security/limits.conf file with an entry like:<br />
+CODE: SELECT ALL<br />
+UID soft nofile 4096<br />
+UID hard nofile 10240</p>
+<p>Once again you will have to replace UID with the user ID of the account with the issue.</p>
+<p>Another possibility is too many threads. We just ran into this error message when running a test harness against an app that uses a thread pool. We used</p>
+<p>watch -n 5 -d “ps -eL | wc -l”</p>
+<p>to watch the ongoing count of Linux native threads running within the given Java process ID. After this hit about 1,000 (for us–YMMV), we started getting the error message you mention.</p>

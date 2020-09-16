@@ -1,0 +1,16 @@
+---
+layout: post
+title: Auto Mounting NTFS
+author: Galuh D Wijatmiko
+categories: ['StorageAndFilesystem',Server]
+tags: [ntfs,centos7,installation,Fileshare]
+---
+
+<p>Mengkaitkan hardisk yang memilki file system NTFS pada saat booting dengan universally unique identifier (UUID).</p>
+<p><em>sudo blkid</em><!--more--></p>
+<p>output : UUID=”xxxxxxxxxxxxxxxxx”</p>
+<p>Contoh, jika akan mengkaikan di /MainGarage, tujuannya agar tidak jauh masuk ke dalam direktori jika membutuhkan sesuatu pada partisi yang akan dikaitkan ini.</p>
+<p><em>sudo mkdir /MainGarage</em></p>
+<p>tambahkan di <em>/etc/fstab</em></p>
+<p><em>UUID=xxxxxxxxxxxxxxxxx /MainGarage ntfs-3g defaults 0 0</em></p>
+<p>Restart</p>

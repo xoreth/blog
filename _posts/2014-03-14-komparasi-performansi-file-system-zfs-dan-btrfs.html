@@ -1,0 +1,24 @@
+---
+layout: post
+title: Performansi Filesystem BTRFS and ZFS
+author: Galuh D Wijatmiko
+categories: ['StorageAndFilesystem',Server]
+tags: [btrfs,centos7,installation]
+---
+<p>Hal yang menyangkut dengan performansi file system zfs dan btrfs telah diuji dan dipaparkan pada :</p>
+<p>[0] ZFS - http://blog.wajatmaka.com/post/79531151383/performansi-file-system-zfs</p>
+<p>[1] BTRFS - http://blog.wajatmaka.com/post/79534759157/performansi-file-system-btrfs<!--more--></p>
+<p>Adapun beberapa hal yang akan dikomparasikan yaitu Storage, Data Integrity dan Kecepatan Akses.<!-- more --></p>
+<p><strong>1. Storage</strong></p>
+<p>Pada sumber <a href="http://blog.wajatmaka.com/post/79531151383/performansi-file-system-zfs">[0]</a> dan <a href="http://blog.wajatmaka.com/post/79534759157/performansi-file-system-btrfs">[1]</a>, masing-masing file system mempunyai keunikan dan konsep yang berbeda. ZFS mempunyai media penyimpanan utama yang besar yang dapat menggabungkan secondary storage menjadi satu pada gambar 1 storage pool zfs.</p>
+<p><img src="{{ site.baseurl }}/assets/tumblr_inline_n2ex5kQT9l1rk47xb.png" alt="image" /></p>
+<p><em>Gambar 1 Storage Pool ZFS</em></p>
+<p>Sedangkan BTRFS lebih cendrung memecah volume utama menjadi sub-sub volume yang bertujuan untuk mempermudah memanajemen sistem berkas.</p>
+<p><img src="{{ site.baseurl }}/assets/tumblr_inline_n2exdpSgua1rk47xb.png" alt="image" /></p>
+<p><em>Gambar 2 Subvolume</em></p>
+<p><strong>2. Data Integrity</strong></p>
+<p>ZFS memilki banyak fitur untuk memanajemen data baik untuk pemeliharaan dan keamanan.</p>
+<p><strong>3. Kecepatan Akses</strong></p>
+<p>Pada sumber <a href="http://blog.wajatmaka.com/post/79531151383/performansi-file-system-zfs">[0]</a> dan <a href="http://blog.wajatmaka.com/post/79534759157/performansi-file-system-btrfs">[1]</a>, BTRFS lebih cepat ketimbang teman dekat nya ZFS.</p>
+<p><strong>#KESIMPULAN</strong></p>
+<p>Storage baik subvol atau pool memiliki kelebihan dan kekurangan, Integritas data lebih banyak pada ZFS walaupun sebagian fitur kritis seperti snapshot, eknripsi dan lain-lain berada di BTRFS tetapi ZFS masih memenangkan komparasinya, sedangkan untuk I/O BTRFS lebih cepat ketimbang teman nya ZFS.</p>

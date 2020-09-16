@@ -1,0 +1,43 @@
+---
+layout: post
+title: "[Oracle  11 G] Menjalankan Service Database"
+author: Galuh D Wijatmiko
+categories: [Databases]
+tags: [oracle,database]
+---
+
+
+<p>Menjalankan service database #oracle di #igosnusantara</p>
+<p>disable    host :<br />
+<strong>xhost +</strong></p>
+<p>masuk ke user oracle :<br />
+<strong>su oracle</strong><br />
+<!-- more --><br />
+pada <strong>/etc/oratab</strong> ubah<br />
+<em>basedata:/opt/oracle/product/11.2.0/db_1:N</em><br />
+menjadi<br />
+<em>basedata:/opt/oracle/product/11.2.0/db_1:Y</em></p>
+<p>lalu pada  <strong>/opt/oracle/product/11.2.0/db_1/bin/dbshu</strong>t<br />
+cari dan ganti,<br />
+<em>ORACLE_HOME_LISTNER=$1</em><br />
+menjadi<br />
+<em>ORACLE_HOME_LISTNER=$ORACLE_HOME</em></p>
+<p>dan pada <strong>/opt/oracle/product/11.2.0/db_1/bin/dbstart</strong><br />
+cari dan ganti,<br />
+<em>ORACLE_HOME_LISTNER=$1</em><br />
+menjadi<br />
+<em>ORACLE_HOME_LISTNER=$ORACLE_HOME</em></p>
+<p>setelah    konfigursi diatas selesai, jalankan service<br />
+[1] jalankan LISTENER<br />
+<strong>lsnrctl start</strong><br />
+[2] jalankan service DATABASE<br />
+<strong>dbstart</strong></p>
+<p>Untuk mengecek, masuk sebagai sys pada oracle :<br />
+<strong>sqlplus  </strong><br />
+lalu pada username isi dengan :<br />
+<strong>/as sysdba</strong></p>
+<p>Untuk mematikan service :</p>
+<p>[1]matikan service database</p>
+<p><strong>dbshut</strong></p>
+<p>[2]matikan listener</p>
+<p><strong>lsnrctl stop</strong></p>

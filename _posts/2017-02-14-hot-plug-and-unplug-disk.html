@@ -1,0 +1,18 @@
+---
+layout: post
+title: Hot Plug And UnPlug Hardisk
+author: Galuh D Wijatmiko
+categories: [StorageAndFilesystem]
+tags: [Service,Storage]
+---
+
+<p><b>Hotplug Disk Drive</b></p>
+<blockquote><p>echo "- - -" &gt; /sys/class/scsi_host/host2/scan<br />
+echo "- - -" &gt; /sys/class/scsi_host/host3/scan</p></blockquote>
+<p><!--more--><br />
+<strong><br />
+Scan All Host SCSI</strong></p>
+<blockquote><p>ls /sys/class/scsi_host/ | while read host ; do echo "- - -" > /sys/class/scsi_host/$host/scan ; done</p></blockquote>
+<p><b>Hot Unplug the Drive</b></p>
+<blockquote><p>echo 1 &gt; /sys/block/sdd/device/delete<br />
+echo 1 &gt; /sys/block/sde/device/delete</p></blockquote>

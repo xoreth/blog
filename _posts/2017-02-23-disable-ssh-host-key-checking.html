@@ -1,0 +1,13 @@
+---
+layout: post
+title:  Disable SSH Host Key Checking
+author: Galuh D Wijatmiko
+categories: [Server]
+tags: [ssh]
+---
+
+<blockquote>ssh UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no user@ip</p></blockquote>
+<p>make alias variable command, open ~/.zshrc or using bash ~/.bashrc :</p>
+<blockquote><p>alias ssh="ssh UserKnownHostsFile=/dev/null -o StrictHostKeyChecking"</p></blockquote>
+<p>reload config </p>
+<blockquote><p>source ~/.zshrc </p></blockquote>

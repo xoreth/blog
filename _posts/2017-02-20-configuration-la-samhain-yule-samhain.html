@@ -1,0 +1,61 @@
+---
+layout: post
+title: Install And Configuration HIDS Yule La Samhain
+author: Galuh D Wijatmiko
+categories: [SecurityTunningAndHardening]
+tags: [samhain,hids]
+---
+
+<p><strong>Download La-Samhain</strong></p>
+<blockquote><p>wget -c http://www.la-samhna.de/archive/samhain_signed-4.1.5.tar.gz</p></blockquote>
+<p><strong>Install Server Yule</strong><br />
+Hostname : sec.wajatmaka.com | FQDN<br />
+Add a User Yule</p>
+<blockquote><p>useradd yule</p></blockquote>
+<p><!--more--><br />
+Compile Yule</p>
+<blockquote><p>
+./configure --enable-network=server --enable-identity=yule  --enable-xml-log<br />
+make install
+</p></blockquote>
+<p><strong>Install Client Samhain</strong><br />
+Hostname : client.wajatmaka.com | FQDN<br />
+Compile Samhain</p>
+<blockquote><p>./configure --enable-network=client  \<br />
+  --with-logserver=sec.wajatmaka.com \<br />
+  --with-config-file=REQ_FROM_SERVER/etc/samhainrc \<br />
+  --with-data-file=REQ_FROM_SERVER/var/lib/samhain/samhain_file \<br />
+  --with-trusted=0</p></blockquote>
+<p>Noted :<br />
+hostname maybe have short hostname and domain hostname, example : sec.wajatmaka.com<br />
+- sec is short hostname<br />
+- wajatmaka.com is a domain</p>
+<p><strong>FROM CLIENT TO SERVER (Samhain to Yule)</strong><br />
+Noted :<br />
+File executable client must be send and reconfigure (about connection) in Yule Server,<br />
+- /etc/samhainrc must be rename and send with format (#rc.hostname) -> rc.client.wajatmaka.com in /var/lib/yule<br />
+- /usr/local/sbin/samhain (#file binary executeable)  rename and send with format (#samhain_host-hostname) -> samhain_host-client.wajatmaka.com in /usr/local/sbin</p>
+<blockquote><p>scp /etc/samhainrc root@192.168.56.101:/var/lib/yule/rc.`hostname`<br />
+scp /usr/local/sbin/samhain root@192.168.56.101:/usr/local/sbin/samhain_host-`hostname`</p></blockquote>
+<p><strong>FROM Server to Client (Yule to Samhain)</strong><br />
+Noted :<br />
+1. Generated unique key<br />
+2. Recreate samhain new with result unique key<br />
+3. Generate Configuration for connection with same key unique<br />
+4. Send samhain.new to Client</p>
+<blockquote><p>yule -G > samhain_host-client.wajatmaka.com.txt<br />
+./yule_setpwd samhain_host-client.wajatmaka.com new $(cat samhain_host-client.wajatmaka.com.txt)<br />
+./yule -P $(cat samhain_host-client.wajatmaka.com.txt) | sed -e 's/HOSTNAME/client.wajatmaka.com/g' >>   /etc/yulerc<br />
+scp samhain_host-client.wajatmaka.com.new root@192.168.56.103:/usr/local/sbin/samhain</p></blockquote>
+<p><strong><br />
+FROM CLIENT TO SERVER (Samhain to Yule)</strong><br />
+Noted :<br />
+1. Generate File integrity in Client<br />
+2. File generated must be send to server in /var/lib/yule/ with format (#file.hostname) -> file.client.wajatmaka.com </p>
+<blockquote><p>/usr/local/sbin/samhain -t init<br />
+scp /var/lib/samhain/samhain_file root@192.168.56.101:/var/lib/yule/file.`hostname`</p></blockquote>
+<p><strong>From Client Check File Integrity</strong><br />
+check log :</p>
+<blockquote><p>tail -f /var/log/samhain_log</p></blockquote>
+<p>verify the integrity of log messages, you have to use the built-in command and enter the logkey received by email to verify the hash of each log entry:</p>
+<blockquote><p>samhain -L /var/log/samhain_log</p></blockquote>

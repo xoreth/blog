@@ -1,0 +1,99 @@
+---
+layout: post
+title: CPU  High Performance INNODB MYSQL
+author: Galuh D Wijatmiko
+categories: [SecurityTunningAndHardening,Databases]
+tags: [Service,mysql]
+---
+
+<p>I learned something amazing about MySQL. If you allocate a single monolithic InnoDB Buffer Pool that is bigger that Total Installed Divided By Number of Physical CPUs, your will incite the OS to regular intervals memory swapping due to a full InnoDB Buffer Pool. MySQL 5.5’s option known as <a href="http://dev.mysql.com/doc/refman/5.5/en/innodb-parameters.html#sysvar_innodb_buffer_pool_instances">innodb_buffer_pool_instances</a><br />
+can be used to split up the buffer pool. Yesterday, I properly<br />
+implemented this for the client I mentioned in my answer last year. I<br />
+still have 162GB for the client’s Buffer Pool. I have set the server’s<br />
+innodb_buffer_pool_instances option to 2 because each DB Server is dual<br />
+hexacore. I was thinking of setting it to 12 but then a colleague showed<br />
+me a <a href="http://blog.jcole.us/2010/09/28/mysql-swap-insanity-and-the-numa-architecture/">blog from Jeremy Cole on MySQL and Swappiness</a>. After reading it, I put it into practice immediately for my client. I ran this command<!--more--></p>
+<pre><code>numactl --hardware</code></pre>
+<p>I saw a mapping of 192GB of server RAM as 96GB to each physical core.<br />
+Therefore, I set the innodb_buffer_pool_instances to 2. Things are<br />
+looking good right now. I will update my answer to see how this affects<br />
+memory swapping for the next 2 montns.</p>
+<p>on my.cnf</p>
+<p>innodb_buffer_pool_size = ???M<br />
+innodb_buffer_pool_instances = ??(default:1.2,4,8)</p>
+<p>Allocation memory : <a href="http://mysql.rjweb.org/doc.php/memory">http://mysql.rjweb.org/doc.php/memory</a></p>
+<p><i>Expression:</i>  <code>innodb_buffer_pool_size / _ram</code><br />
+<i>Meaning:</i>  % of RAM used for InnoDB buffer_pool<br />
+<i>Recommended range:</i>  60~80%</p>
+<p><i>Expression:</i>  <code>Innodb_buffer_pool_reads / Innodb_buffer_pool_read_requests</code><br />
+<i>Meaning:</i>  Read requests that had to hit disk<br />
+<i>Recommended range:</i>  0-2%<br />
+<i>What to do if out of range:</i>  Increase innodb_buffer_pool_size if you have enough RAM.</p>
+<p><i>Expression:</i>  <code>Innodb_pages_read / Innodb_buffer_pool_read_requests</code><br />
+<i>Meaning:</i>  Read requests that had to hit disk<br />
+<i>Recommended range:</i>  0-2%<br />
+<i>What to do if out of range:</i>  Increase innodb_buffer_pool_size if you have enough RAM.</p>
+<p><i>Expression:</i>  <code>Innodb_pages_written / Innodb_buffer_pool_write_requests</code><br />
+<i>Meaning:</i>  Write requests that had to hit disk<br />
+<i>Recommended range:</i>  0-15%<br />
+<i>What to do if out of range:</i>  Check innodb_buffer_pool_size</p>
+<p><i>Expression:</i>  <code>Innodb_buffer_pool_reads / Uptime</code><br />
+<i>Meaning:</i>  Reads<br />
+<i>Recommended range:</i>  0-100/sec.<br />
+<i>What to do if out of range:</i>  Increase innodb_buffer_pool_size?</p>
+<p><i>Expression:</i>  <code>(Innodb_buffer_pool_reads + Innodb_buffer_pool_pages_flushed)  / Uptime</code><br />
+<i>Meaning:</i>  InnoDB I/O<br />
+<i>Recommended range:</i>  0-100/sec.<br />
+<i>What to do if out of range:</i>  Increase innodb_buffer_pool_size?</p>
+<p><i>Expression:</i>  <code>Innodb_buffer_pool_pages_flushed / Uptime</code><br />
+<i>Meaning:</i>  Writes (flushes)<br />
+<i>Recommended range:</i>  0-100/sec.<br />
+<i>What to do if out of range:</i>  Increase innodb_buffer_pool_size?</p>
+<p><i>Expression:</i>  <code>Innodb_buffer_pool_wait_free / Uptime</code><br />
+<i>Meaning:</i>  Counter for when there are no free pages in buffer_pool.  That is, all pages are dirty.<br />
+<i>Recommended range:</i>  0-1/sec.<br />
+<i>What to do if out of range:</i>  First be sure innodb_buffer_pool_size is set reasonably; if still trouble, decrease innodb_max_dirty_pages_pct</p>
+<p>OBSERVATION #1</p>
+<p>When committing to use InnoDB, you also need to commit to tuning for multiple cores.</p>
+<ul>
+<li><a href="http://dev.mysql.com/doc/refman/5.5/en/innodb-parameters.html#sysvar_innodb_read_io_threads">innodb_read_io_threads</a> : The default is 4. I would raise it 16.</li>
+<li><a href="http://dev.mysql.com/doc/refman/5.5/en/innodb-parameters.html#sysvar_innodb_write_io_threads">innodb_write_io_threads</a> : The default is 4. I would raise it 16.</li>
+</ul>
+<p>OBSERVATION #2</p>
+<p>I see you have <code>innodb_thread_concurrency = 8</code>. If you set <a href="http://dev.mysql.com/doc/refman/5.5/en/innodb-parameters.html#sysvar_innodb_thread_concurrency">innodb_thread_concurrency</a><br />
+to 0 (which is the default), you will have infinite concurrency. That<br />
+let’s the InnoDB storage engine decide how to many threads it feels it<br />
+needs and can handle.</p>
+<p>OBSERVATION #3</p>
+<p>Your DB Server has 12GB of RAM. Your InnoDB Buffer Pool is bigger<br />
+than half the RAM. You need to partition the Buffer Pool by setting <a href="http://dev.mysql.com/doc/refman/5.5/en/innodb-parameters.html#sysvar_innodb_buffer_pool_instances">innodb_buffer_pool_instances</a> to 2. In conjunction with this, you need to run <code>numactl --interleave=all</code> (Not applicable to VMs).</p>
+<p>OBSERVATION #4</p>
+<p>I see you have <code>innodb_file_format = Barracuda</code>. I wish you can go back to <code>innodb_file_format = Antelope</code>.<br />
+Why go back to uncompressed? It tends to bloat the InnoDB Buffer Pool<br />
+because compressed and uncompressed data and index pages coexist in the<br />
+Buffer Pool. I just wrote about this : See my post <a href="http://dba.stackexchange.com/questions/14246/innodb-file-format-barracuda/14287#14287">innodb_file_format Barracuda</a></p>
+<p>EPILOGUE</p>
+<p>Here are some of my past posts on tuning InnoDB</p>
+<ul>
+<li><code>Oct 22, 2012</code> : <a href="http://dba.stackexchange.com/questions/27328/how-large-should-be-mysql-innodb-buffer-pool-size/27341#27341">How large should be mysql innodb_buffer_pool_size?</a></li>
+<li><code>Jul 23, 2012</code> : <a href="http://dba.stackexchange.com/questions/21290/how-to-get-the-most-out-of-mysql-on-a-quadcore-machine-with-16-gb-of-ram/21329#21329">How to get the most out of MySQL on a QuadCore machine with 16 GB of RAM?</a></li>
+<li><code>Jul 21, 2012</code> : <a href="http://dba.stackexchange.com/questions/21209/innodb-high-disk-write-i-o-on-ibdata1-file-and-ib-logfile0/21271#21271">InnoDB - High disk write I/O on ibdata1 file and ib_logfile0</a></li>
+<li><code>Sep 20, 2011</code> : <a href="http://dba.stackexchange.com/questions/5926/multi-cores-and-mysql-performance/5968#5968">Multi cores and MySQL Performance</a></li>
+<li><code>Sep 12, 2011</code> : <a href="http://dba.stackexchange.com/questions/5666/possible-to-make-mysql-use-more-then-one-core/5670#5670">Possible to make MySQL use more than one core?</a></li>
+<li><code>Feb 12, 2011</code> : <a href="http://dba.stackexchange.com/questions/194/how-do-you-tune-mysql-for-a-heavy-innodb-workload/1185#1185">How do you tune MySQL for a heavy InnoDB workload?</a></li>
+</ul>
+<p>Looking again at your <code>my.ini</code>, I have some more recommendations in terms of memory usage:</p>
+<ul>
+<li>Set <a href="http://dev.mysql.com/doc/refman/5.5/en/server-system-variables.html#sysvar_query_cache_size">query_cache_size</a> to 0. Yes, <a href="http://dba.stackexchange.com/a/23727/877">I am saying disable the query cache the query cache because it battles head-to-head with InnoDB all the time</a>.</li>
+<li>Lower your <a href="http://dev.mysql.com/doc/refman/5.5/en/innodb-parameters.html#sysvar_innodb_log_buffer_size">innodb_log_buffer_size</a><br />
+to 32M. Granted, having the InnoDB Log Buffer large can save on disk<br />
+I/O. Having the InnoDB Log Buffer too large can result in longer commits<br />
+and checkpoints take. This could manifest itself as a bottleneck for<br />
+each thread, possibly underutilizing cores.</li>
+<li>You did not set <a href="http://dev.mysql.com/doc/refman/5.5/en/innodb-parameters.html#sysvar_innodb_log_file_size">innodb_log_file_size</a>. The default is 5M. This might be too small. With such a large Buffer Pool, you may want to increase it to 1G. See my post <a href="http://dba.stackexchange.com/questions/1261/how-to-safely-change-mysql-innodb-variable-innodb-log-file-size/1265#1265">How to safely change MySQL innodb variable ‘innodb_log_file_size’?</a> on how increase <code>ib_logfile0</code> and <code>ib_logfile1</code>.</li>
+<li>SUPPLEMENTAL INFO : You did not set <a href="http://dev.mysql.com/doc/refman/5.5/en/innodb-parameters.html#sysvar_innodb_fast_shutdown">innodb_fast_shutdown (Default is 1)</a>. You should add <code>innodb_fast_shutdown=0</code> to <code>my.ini</code>.<br />
+That will cause all uncommitted transactions to be fully purged from<br />
+ibdata1, ib_logfile0, and ib_logfile1 whenever you shutdown mysqld. This<br />
+makes for a shorter InnoDB Crash Recovery Cycle on startup.</li>
+<li>SUPPLEMENTAL INFO : You did not set <a href="http://dev.mysql.com/doc/refman/5.5/en/innodb-parameters.html#sysvar_innodb_file_per_table">innodb_file_per_table</a>. That means everything InnoDB and its grandmother is sitting in ibdata1. Besides data and index pages, <a href="http://www.scribd.com/doc/31337494/XtraDB-InnoDB-internals-in-drawing">there are other moving parts to <code>ibdata1</code></a>. You can spread out disk I/O for InnoDB by separating InnoDB tables from ibdata1. See my StackOverflow post <a href="http://stackoverflow.com/a/4056261/491757">Howto: Clean a mysql InnoDB storage engine?</a> on how to do this and to fully defragment <code>ibdata1</code>.</li>
+</ul>

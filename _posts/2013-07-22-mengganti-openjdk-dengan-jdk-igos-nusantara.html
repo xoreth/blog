@@ -1,0 +1,21 @@
+---
+layout: post
+title: "Switch JDK Version"
+author: Galuh D Wijatmiko
+categories: [Packaging]
+tags: [jdk,jvm]
+---
+
+<p>Jika mempunyai OpenJDK dan JDK maka harus memakai salah satu dari meraka. cara memilihnya dapat menggunakan <strong>alternatives</strong> :<!-- more --></p>
+<p><strong>alternatives –install /opt/jdk java  /opt/jdk/bin/java 90</strong><br />
+<strong>alternatives –install /opt/jdk javac /opt/jdk/bin/javac 90</strong><!--more--></p>
+<p><strong>alternatives –config java</strong></p>
+<p>lalu pilih<strong> jdk</strong></p>
+<p><strong>alternatives –config javac</strong></p>
+<p>lalu pilih yang dimiliki <strong>jdk</strong></p>
+<p>Selesai, lalu cek :<strong><br />
+</strong></p>
+<p><em><strong>➜  ~  java -version</strong></em><br />
+<em><strong>java version “1.7.0_25”</strong></em><br />
+<em><strong>Java™ SE Runtime Environment (build 1.7.0_25-b15)</strong></em><br />
+<em><strong>Java HotSpot™ 64-Bit Server VM (build 23.25-b01, mixed mode)</strong></em></p>

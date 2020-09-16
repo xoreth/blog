@@ -1,0 +1,9 @@
+---
+layout: post
+title: Purge Package Debian
+author: Galuh D Wijatmiko
+categories: [Packaging,Script]
+tags: [KernelOptimize,Script]
+---
+
+<blockquote>dpkg -l | awk '$1=="rc" {print $2}' | xargs dpkg -P</p></blockquote>

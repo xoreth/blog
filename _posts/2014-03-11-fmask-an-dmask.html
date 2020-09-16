@@ -1,0 +1,52 @@
+---
+layout: post
+title: Fmask and dmask
+author: Galuh D Wijatmiko
+categories: [Troubleshot]
+tags: [Linux]
+---
+
+<div id="post_message_9115998">
+<blockquote class="postcontent restore">
+<div>umask is set to controld permissions (set by the server administrator) for newly created files &amp; directories. That is created by other users on the system.When you set a umask for example 0666 then you need to minus this 0666 with 0777 for a directory and 0666 for files.<br />
+And then you get a system umask of 0111. 0666 - 0777 = 0111 for your directoryes, and 0555 for your files.<!-- more -->The directory number to minus your umask with is 0777 and<br />
+the files number to minus your umask with is 0666Another example. Directory.<br />
+0222 - 0777 = 0555<br />
+0274 - 0777 = 0503and Files.<br />
+0222 - 0666 = 0444<br />
+0264 - 0666 = 0402a umask 0000 is = 0777 = all permissions<br />
+Read<br />
+Write<br />
+Executea umask 0111 is = 0666 = Read + WriteWhen looking at permissions you seex xxx xxx xxx<br />
+x = Type (directory, file, special files e.c.t)<br />
+#1 xxx = users<br />
+#2 xxx = groups<br />
+#3 xxx = othersThese 3 x then has a value.<br />
+4 2 1 4 2 1 4 2 1<br />
+X X X X X X X X X<br />
+R W X R W X R W XR = Read<br />
+W = Write<br />
+X = Executethe value 7 is all the numbers in a XXX group put together 4+2+1 = 7 = all permissions.If it was 0752 then it would be<br />
+#1 Users = all permissions 4+2+1 = 7<br />
+#2 Groups = Write + Execute 4+1 = 5<br />
+#3 Others = Write 2 = 2Hope this helpsADDED:<br />
+For the first digit in a umask. Its a sticky bit.(4)xxx sets the SUID<br />
+(2)xxx sets the SGID<br />
+(1)xxx sets the sticky bit<br />
+(6)xxx sets both the SUID and SGID<br />
+(7)xxx sets all three The sticky bit does if more people (a group) has 0777 permissions to a file, then they can delete the file also. If i want<br />
+them to have all permissions but not able to delete the file i can set a sticky bit 1777 and then its only the owner of the file who can delete it. The group can still see the file, open it, change its contents. They can do all that the permissions alow them to EXECT deleting the file.And then the permissions would look like this rwx-rwx-rwt the t reporsents the sticky bit. A umask of 1777</div>
+</blockquote>
+<blockquote class="postcontent restore">
+<div>
+<div id="LC54" class="line"><span class="s2">“fmask=177,dmask=077”</span> <span class="s2">“Root has read/write access, users have no access”</span></div>
+<div id="LC55" class="line"><span class="s2">“fmask=333,dmask=222”</span> <span class="s2">“Everyone has read only access”</span></div>
+<div id="LC56" class="line"><span class="s2">“fmask=133,dmask=022”</span> <span class="s2">“Everyone has read access, but only root can write”</span></div>
+<div id="LC57" class="line"><span class="s2">“fmask=111,dmask=000”</span> <span class="s2">“All users can read/write to any file”</span></div>
+</div>
+<div></div>
+<div></div>
+<div>References : http://ubuntuforums.org/showthread.php?t=1453342</div>
+</blockquote>
+</div>
+<p><!--more--></p>

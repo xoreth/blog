@@ -1,0 +1,18 @@
+---
+layout: post
+title: DML Export Mariadb Database to CSV
+author: Galuh D Wijatmiko
+categories: [Script,Databases]
+tags: [mysql,Script]
+---
+
+<blockquote>DML Export Import Mariadb (Mysql) to csv Format</p></blockquote>
+<p><!--more--></p>
+<div class="attribution">
+<p><strong>Export Content Table to CSV</strong></p>
+<p>mysql -u root -p nama_db -e “select  column_1, column_2, column_3 from Tabel_target ” | sed ’s/t/“,”/g;s/^/“/;s/$/”/’ &gt; text.csv</p>
+<p><strong>Export Database to CSV</strong></p>
+<p>mysqldump -u root -p nama_db &gt; export.db</p>
+<p><strong>regex :</strong></p>
+<p><strong>sed ’s/t/“,”/g;s/^/“/;s/$/”/’ (regex CSV Format)</strong></p>
+</div>

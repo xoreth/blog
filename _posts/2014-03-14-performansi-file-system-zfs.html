@@ -1,0 +1,193 @@
+---
+layout: post
+title: Performansi Filesystem ZFS
+author: Galuh D Wijatmiko
+categories: ['StorageAndFilesystem',Server]
+tags: [zfs,centos7,installation]
+---
+<p>Pengujian performansi file system dibagi menjadi tiga bagian diantaranya adalah <em>storage, data integrity dan  kecepatan akses</em>. <!-- more --></p>
+<p><strong>SPESIFIKASI PERANGKAT KERAS</strong><!--more--></p>
+<p>Adapun perangkat keras yang digunakan untuk pengujian file system adalah sebagai berikut :</p>
+<blockquote><p>Processor Berkecepatan 2.40 GHz Core I 3<br />
+RAM Berkapasitas 2 GB<br />
+Resolusi Layar Resolusi 1366x768<br />
+Hardisk Berkapasitas 360 GB<br />
+Penunjang Lain Mouse, Flashdisk dan Keyboard</p></blockquote>
+<p>Spesifikasi Flashdisk yang digunakan untuk bahan uji coba adalah 2 Flashdisk HP v220w 8GB. Adapun spesifikasinya adalah sebagai berikut :</p>
+<blockquote><p>Write Speed Up to 8.0 MB/Second<br />
+Read Speed Up to 25.0 MB/Second<br />
+O/S Support Microsoft Windows Linux 2000/XP/Vista/7 and Mac OS<br />
+Dimension (WHD) 34.6(L) x 12.2(W) x 4.5(H) mm<br />
+Weight 4.5 gram<br />
+Others Temperature : 0°C ~ 60°C, Storage Temp : -25°C ~ 85°C</p></blockquote>
+<p>Sumber : [0] http://alnect.net/products.php?/8/33/504/3891/Storage-Media/USB-FlashDisk-8GB/Hewlett-Packard/UFD-Hawlett-Packard-(HP)-v220w-8GB</p>
+<p><strong>A. ZFS</strong></p>
+<p>Apa ZFS itu?</p>
+<p>[1] http://en.wikipedia.org/wiki/ZFS</p>
+<p>[2] https://wiki.freebsd.org/ZFS</p>
+<p>Pemasangan ZFS pada GNU/Linux membutuhkan diantaranya adalah :</p>
+<p>1. <strong>SPL</strong> (Solaris Porting Layer) berfungsi sebagai Kernel modul Linux yang menyediakan banyak kernel API Solaris. Lapisan ini memungkinkan untuk menjalankan kode kernel Solaris dalam kernel Linux dengan modifikasi yang relatif minim.</p>
+<p>2. <strong>ZFS</strong> yang berfungsi sebagai modul file system zfs yang digunakan di Linux, File system zfs di linux ini belum stabil. Adapaun fitur yang baru dimasukan oleh pengembang : SPA, DMU, ZVOL, ZPL.</p>
+<p>SPL dan ZFS dapat diunduh <em><a href="http://zfsonlinux.org">http://zfsonlinux.org</a>.</em></p>
+<p><em>=========Implementasi dan Pengujian========</em></p>
+<p><strong>A. Storage</strong><br />
+Pool Storage dapat dibuat dengan syarat, tabel partisi pada perangkat keras secondary storage adalah GPT (Guid Partition Table). Pembuatan tabel partisi GPT :</p>
+<blockquote><p>1) Lihat daftar perangkat flashdisk yang akan dibuat untuk GPT.<br />
+<em>sudo fdisk –l</em><br />
+2) Buat tabel GPT dengan software cgdisk.<br />
+<em>cgdisk /dev/sdc1</em><br />
+3) Buat file type partisi GUID dengan kode bf00<br />
+4) Pastikan Partition table adalah GPT. p<em>arted /dev/sdc1 print</em>.</p></blockquote>
+<p>Pembuatan Pool Storage, contoh kasus menggunakan flashdisk :</p>
+<blockquote><p>1) Tentukan direktori tempat penyimpanan pool dan device, lalu buat pool.<br />
+zpool create zfslinika /dev/sdc1<br />
+Device dapat ditanamkan lebih dari satu.<br />
+2) Pool akan tersedia pada direktori /zfslinika.<br />
+3) Pool akan terlihat jika dilihat dengan perintah zpool list.</p></blockquote>
+<p><strong>B. Data Integrity </strong></p>
+<p>Data integrity, berperan khusus untuk kepentingan integritas data ataupun untuk keamanan data. ZFS dapat melakukan keamanan data diantaranya dengan snapshot, RAID, cloning, migration dan compressing.</p>
+<p><strong>B.2.1 Snaphot</strong><br />
+Snapshot dapat dibuat dengan syarat, pool harus memiliki dataset. Dataset ini berfungsi untuk merekam data pada data asli tetapi hanya berupa pointer tujuannya adalah sebagai host checkpoint <em>untuk mengembalikan data</em> saat snapshot dilakukan. Adapun pembuatan dataset adalah</p>
+<blockquote><p><em>zfs create zfslinika/myfirstDS</em></p></blockquote>
+<p>Dataset mempunyai ciri khusus yaitu berupa direktori dan tidak bisa dihapus dengan rmdir.<br />
+Proses pengembalian data dengan snapshot pada ZFS dapat dilakukan dengan syarat memiliki dataset, Adapun proses snapshot dan pengembalian data adalah sebagai berikut :</p>
+<blockquote><p>1) Duplikasi data yang diinginkan, contoh menduplikasi seluruh file yang berada pada ~/Downloads.<br />
+<em>cp –rf ~/Downloads /zfslinika/myfirstDS</em><br />
+2) Snapshot dibuat dengan format pool/dataset@snapshot-name<br />
+<em>zfs snapshot zfslinika/myfirstDS@catat1</em><br />
+3) Hapus data pada /zfslinika/myfirstDS<br />
+<em>rm –rf /zfslinika/myfirstds</em><br />
+4) Lihat direktori untuk memastikan bahwa data telah terhapus.<br />
+<em>ls –l</em><br />
+5) Kembalikan data yang telah terhapus dengan rollback.<br />
+<em>zfs rollback zfslinika/myfirstDS@catat1</em></p></blockquote>
+<p><strong>B.2.2 RAID</strong></p>
+<p>ZFS memiliki fitur RAID (Pengertian RAID <a href="http://en.wikipedia.org/wiki/RAID">1</a> dan <a href="//en.wikipedia.org/wiki/Standard_RAID_levels">2</a>) untuk mengamankan data ataupun membuat ukuran media penyimpanan menjadi lebih besar. Spesifikasi perangkat keras yang digunakan pada uji coba ini adalah dua flashdisk kurang lebih berkapaistas 8 GB memiliki spesifikasi yang sama, tercantum pada [0]. RAID yang diuji dalam uji coba ini adalah :</p>
+<p>1 Raid0</p>
+<blockquote><p>Perintah :</p>
+<p><em>zpool create zfslinikard0 /dev/sdc1 /dev/sdd1</em></p>
+<p>Keterangan : Kapaistas total menjadi 15 GB pada Raid0 menggunakan 2 secondary storage untuk digabungkan tanpa mirroring.</p></blockquote>
+<p>2 Raid1</p>
+<blockquote><p>Perintah :</p>
+<p><em>zpool create zfslinikard1 mirror /dev/sdc1 /dev/sdd1</em></p>
+<p>Keterangan : Kapasitas 7.5 GB pada Raid1 menggunakan 2 secondary storage untuk digabungkan dengan fitur mirroring.</p></blockquote>
+<p>3 Raid5</p>
+<blockquote><p>Perintah :</p>
+<p><em>zpool create zfslinikard5 raidz /dev/sdc1 /dev/sdd1 </em></p>
+<p>Keterangan :  15 GB Pada Raid5 menggunakan 2 secondary storage, dengan pembuatan dan pembagian parity data.</p></blockquote>
+<p><strong>B.2.2.1</strong> <strong>Performansi RAID 0 ZFS</strong><br />
+Kecepatan Read/Write atau I/O dengan menentukan penulisan block dapat dilakukan dengan dd. Dd adalah software konversi, pembuatan file. Dd dapat membuat file besar secepat mungkin. Hal ini merupakan tes mendasar untuk mengetahui performansi Read/Write atau I/O file system yang digunakan. Kapasitas file yang dibuat harus lebih besar dari jumlah RAM yang digunakan tujuannya menghindari caching file pada memory.<br />
+Performansi RAID 0 write (input) dengan dd dapat dilakukan dengan perintah :</p>
+<p><em>time dd if=/dev/zero of=/zfslinikard0/write.tmp bs=4k count=1000000</em></p>
+<p>Hasil yang didapat adalah :</p>
+<blockquote><p>1000000 records in<br />
+1000000 records out<br />
+4096000000 bytes (4,1 GB)<br />
+Dengan waktu 34 menit 0.92 detik.<br />
+Rata-rata transfer perdetik dalam MB adalah :<br />
+(4096000000/1024/1024)/((34*60)+0.92)=1.91 Mb/sec</p></blockquote>
+<p>Kecepatan transfer write (input) dengan dd pada file system zfs RAID0 dengan 4 block pengulangan 1000000 kali menggunakan flashdisk adalah 1.91 Mb/s.</p>
+<p>Performansi RAID 0 read (output) dengan dd dapat dilakukan dengan perintah :</p>
+<p><em>time dd if=/zfslinikard0/write.tmp of=/zfslinikard0/read.tmp bs=4k</em></p>
+<p>Hasil yang didapat adalah :</p>
+<blockquote><p>1000000 records in<br />
+1000000 records out<br />
+4096000000 bytes (4,1 GB)<br />
+Dengan waktu 63 menit 0.494 detik.<br />
+Rata-rata transfer perdetik dalam MB adalah :<br />
+(4096000000/1024/1024)/((63*60)+0.494)=1.03 Mb/sec</p></blockquote>
+<p>Kecepatan transfer read (output) dengan dd pada file system zfs RAID0 dengan 4 block pengulangan 1000000 kali menggunakan flashdisk adalah 1.03 Mb/s.</p>
+<p><strong>B.2.2.2</strong> <strong>Performansi RAID 1 ZFS</strong><br />
+Kecepatan Read/Write atau I/O dengan menentukan penulisan block dapat dilakukan dengan dd. Dd adalah software konversi, pembuatan file. Dd dapat membuat file besar secepat mungkin. Hal ini merupakan tes mendasar untuk mengetahui performansi Read/Write atau I/O file system yang digunakan. Kapasitas file yang dibuat harus lebih besar dari jumlah RAM yang digunakan tujuannya menghindari caching file pada memory.<br />
+Performansi RAID 1 write (input) dengan dd dapat dilakukan dengan perintah :</p>
+<p><em>time dd if=/dev/zero of=/zfslinikard1/write.tmp bs=4k count=1000000</em></p>
+<p>Hasil yang didapat adalah :</p>
+<blockquote><p>1000000 records in<br />
+1000000 records out<br />
+4096000000 bytes (4,1 GB)<br />
+Dengan waktu 76 menit 0.92 detik.<br />
+Rata-rata transfer perdetik dalam MB adalah :<br />
+(4096000000/1024/1024)/((76*60)+0.92)=0.856 Mb/sec atau 856 Kb/sec.</p></blockquote>
+<p>Kecepatan transfer write (input) dengan dd pada file system zfs RAID1 dengan 4 block pengulangan 1000000 kali menggunakan flashdisk adalah 0.856 Mb/s.</p>
+<p>Performansi RAID 1 read (output) dengan dd dapat dilakukan dengan perintah :</p>
+<p><em>time dd if=/home/wajatmaka/write.tmp of=/zfslinikard0/read.tmp bs=4k </em></p>
+<p>Hasil yang didapat adalah :</p>
+<blockquote><p>1000000 records in<br />
+1000000 records out<br />
+4096000000 bytes (4,1 GB)<br />
+Dengan waktu 102 menit 0.839 detik.<br />
+Rata-rata transfer perdetik dalam MB adalah :<br />
+(4096000000/1024/1024)/((102*60)+0.839)=0.638 Mb/s atau 638 Kb/s</p></blockquote>
+<p>Kecepatan transfer read (output) dengan dd pada file system zfs RAID1 dengan 4 block pengulangan 1000000 kali menggunakan flashdisk adalah 0.638 Mb/s.</p>
+<p><strong>B.2.2.3</strong> <strong>Performansi RAID 5 ZFS</strong><br />
+Kecepatan Read/Write atau I/O dengan menentukan penulisan block dapat dilakukan dengan dd. Dd adalah software konversi, pembuatan file. Dd dapat membuat file besar secepat mungkin. Hal ini merupakan tes mendasar untuk mengetahui performansi Read/Write atau I/O file system yang digunakan. Kapasitas file yang dibuat harus lebih besar dari jumlah RAM yang digunakan tujuannya menghindari caching file pada memory.<br />
+Performansi RAID 5 write (input) dengan dd dapat dilakukan dengan perintah :</p>
+<p><em>time dd if=/dev/zero of=/zfslinikard5/write.tmp bs=4k count=1000000</em></p>
+<p>Hasil yang didapat adalah :</p>
+<blockquote><p>1000000 records in<br />
+1000000 records out<br />
+4096000000 bytes (4,1 GB)<br />
+Waktu yang dibutuhkan 82 menit 0.644 detik. Pada RAID5 memiliki total space adalah 7.63 GB dan total tertulis oleh dd adalah 4.1 GB. Paritas yang disediakan oleh RAID5 adalah 7.63 GB-4.1 GB=3.5 GB untuk menangani kesalahan data.<br />
+Rata-rata transfer perdetik dalam MB adalah :<br />
+(4096000000/1024/1024)/((82*60)+0.644)=0.793 Mb/s atau 793 Kb/s.</p></blockquote>
+<p>Kecepatan transfer write (input) dengan dd pada file system zfs RAID5 dengan 4 block pengulangan 1000000 kali menggunakan flashdisk adalah 0.793 Mb/s.</p>
+<p>Performansi RAID 5 read (output) dengan dd dapat dilakukan dengan perintah :</p>
+<p><em>time dd if=/home/wajatmaka/write.tmp of=/zfslinikard0/read.tmp bs=4k </em></p>
+<p>Hasil yang didapat adalah :</p>
+<blockquote><p>1000000 records in<br />
+1000000 records out<br />
+4096000000 bytes (4,1 GB)<br />
+Dengan waktu 250 menit 0.384 detik. Pada RAID5 memiliki total space adalah 7.63 GB dan total tertulis oleh dd adalah 4.1 GB. Paritas yang disediakan oleh RAID5 adalah 7.63 GB-4.1 GB=3.5 GB untuk menangani kesalahan data.<br />
+Rata-rata transfer perdetik dalam MB adalah :<br />
+(4096000000/1024/1024)/((250*60)+0.384)= 0.2603 Mb/s atau 260 Kb/s.</p></blockquote>
+<p>Kecepatan transfer read (output) dengan dd pada file system zfs RAID5 dengan 4 block pengulangan 1000000 kali menggunakan flashdisk adalah 0.2603 Mb/s.</p>
+<p><strong>B.2.3 Clone</strong><br />
+Clone adalah fitur zfs untuk membackup, menduplikasi atau memetakan dataset. Sehingga apabila dataset asli mengalami kerusakan, masih ada dataset hasil duplikasi untuk dipakai. Cloning dapat dilakukan dengan cara :</p>
+<p><em>zfs clone zfslinika/myfirstDS@catat2 zfslinika/myfirstDS</em></p>
+<p>Untuk memastikan dataset sudah terduplikasi dengan baik, maka</p>
+<p><em>zfs list –t all</em></p>
+<p><strong>B.2.4. Migration</strong><br />
+Migration berfungsi untuk memigrasikan pool dari server lama ke server baru ataupun sebaliknya. Sehingga data dapat dipindahkan dengan mudah. Adapun cara migrasi :</p>
+<p>1) Ekpor pool<br />
+<em>zpool export zfslinika</em></p>
+<p>2) Import pool<br />
+<em>zpool import zfslinika</em></p>
+<p><strong>B.2.5 Compressing</strong><br />
+Compressing berguna untuk mengkompresi pool, tujuannya adalah untuk membuat pool memilki ukuran kecil dan untuk keamanan data (efesiensi data). Pengaktifan compressing pada pool dapat dilakukan :</p>
+<p><em>zfs set compression=on zfslinika</em></p>
+<p><strong>C.<span class="Apple-tab-span"> </span>Kecepatan Akses</strong></p>
+<p>Pada poin ini menjelaskan analisis performansi kecepatan akses pada file system zfs dalam Read dan Write dengan satu media flashdisk 8 GB.</p>
+<p><strong>C.1. Kecepatan Akses Blok Random</strong><br />
+Kecepatan akses ditinjau dari segi read/write suatu data terhadap file system. Diantaranya kecepatan data pada saat melakukan duplikasi, pemotongan dan ekstraksi dari suatu file yang terkompresi. File yang digunakan untuk kecepatan akses ini berkapasitas 480 Mb dengan 1305 direktori utama. Adapun rata-rata waktu yang dibutuhkan sistem pada ZFS adalah sebagai berikut :</p>
+<blockquote><p>1) Kecepatan duplikasi<br />
+<em>time cp /home/wajatmaka/file480mb.tar.gz /zfslinika</em><br />
+2) Kecepatam pemotongan<br />
+<em>time mv /home/wajatmaka/file480mb.tar.gz /zfslinika</em><br />
+3) Kecepatan ekstraksi /zfslinika<br />
+<em>time tar xvf file480mb.tar.gz </em></p></blockquote>
+<p>Adapun hasil estimasi waktu adalah sebagai berikut :</p>
+<blockquote><p>1 Kecepatan duplikasi 2 menit 0.38 detik<br />
+2 Kecepatan pemotongan 2 menit 0.16 detik<br />
+3 Kecepatan ekstrak 4 menit 0.86 detik</p></blockquote>
+<p><strong>C.2 Kecepatan Akses I/O Menggunakan DD</strong><br />
+Kecepatan Read/Write atau I/O dengan menentukan penulisan block dapat dilakukan dengan dd. Dd adalah software konversi, pembuatan file. Dd dapat membuat file besar secepat mungkin. Hal ini merupakan tes mendasar untuk mengetahui performansi Read/Write atau I/O file system yang digunakan. Kapasitas file yang dibuat harus lebih besar dari jumlah RAM yang digunakan tujuannya menghindari caching file pada memory.<br />
+Spesifikasi perangkat keras yang digunakan pada penelitian ini adalah flashdisk 8 GB tercantum pada [0], maka performansi write (input) dengan dd dapat dilakukan dengan perintah :</p>
+<p><em>time dd if=/dev/zero of=/zfslinika/write.tmp bs=4k count=1000000</em></p>
+<p>Hasil yang didapat adalah :</p>
+<blockquote><p>1000000 records in<br />
+1000000 records out<br />
+4096000000 bytes (4.1 GB)<br />
+Dengan waktu 15 menit 2.006 detik.<br />
+Rata-rata transfer perdetik dalam MB adalah :<br />
+(4096000000/1024/1024)/((15*60)+2.006)=4.3 Mb/sec</p></blockquote>
+<p>Kecepatan transfer write (input) dengan dd pada file system zfs dengan 4 block pengulangan 1000000 kali menggunakan flashdisk adalah 4.3 Mb/s.<br />
+Adapun performansi Read (output) dari file write.tmp dapat dilakukan dengan cara sebagai berikut :</p>
+<p><em>time dd if=/home/wajatmaka/write.tmp of=/zfslinika/b.tmp bs=4k</em></p>
+<p>asil yang didapat adalah :</p>
+<blockquote><p>1000000 records in<br />
+1000000 records out<br />
+4096000000 bytes (4.1 GB)<br />
+Dengan waktu 13 menit 23.837 detik<br />
+Rata-rata transfer perdetik dalam MB adalah :<br />
+(4096000000/1024/1024)/((12*60)+23.837)=5.2 Mb/sec</p></blockquote>
+<p>Kecepatan transfer read (output) dari file write.tmp menggunakan dd pada file system zfs dengan 4 block pengulangan 1000000 kali menggunakan flashdisk adalah 5.2 Mb/s.</p>

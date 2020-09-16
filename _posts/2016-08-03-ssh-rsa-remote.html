@@ -1,0 +1,60 @@
+---
+layout: post
+title: Passwordless SSH
+author: Galuh D Wijatmiko
+categories: [Server]
+tags: [Service,ssh]
+---
+
+<h2>setting ssh authorized_keys</h2>
+<p><strong>– SERVER –</strong></p>
+<p>in /etc/ssh/sshd_config set passwordAuthentication yes to let server temporary accept password authentication<!--more--></p>
+<p><strong>– CLIENT –</strong></p>
+<ul>
+<li>generate private and public keys (client side) # ssh-keygen<br />
+here pressing just ENTER you get DEFAULT 2 files “id_rsa” and “id_rsa.pub” in ~/.ssh/ but if you give a name_for_the_key the generated files are saved in your pwd`“</li>
+<li>place the your_key.pub to target machine ssh-copy-id user_name@host_name<br />
+if you didn’t create default key this is the first step to go wrong … you should use<br />
+<code>ssh-copy-id -i path/to/key_name.pub user_name@host_name</code></li>
+<li>logging ssh user_name@host_name will work only for default id_rsa so here is 2nd trap for you need to ssh -i path/to/key_name user@host<br />
+<code>(use ssh -v ... option to see what is happening)</code><br />
+If server still asks for password then you gave smth. to Enter passphrase: when you’ve created keys ( so it’s normal)<br />
+if ssh is not listening default port 22 must use ssh -p port_nr</li>
+</ul>
+<p><strong>– SERVER –</strong></p>
+<ul>
+<li>modify /etc/ssh/sshd_config to have</li>
+</ul>
+<blockquote>
+<blockquote><p>RSAAuthentication yes</p>
+<p>PubkeyAuthentication yes</p>
+<p>AuthorizedKeysFile %h/.ssh/authorized_keys<br />
+(uncoment if case)”`<br />
+This tells ssh to accept authorized_keys and look in user home directory for key_name sting written in .ssh/authorized_keys file</p></blockquote>
+</blockquote>
+<ul>
+<li>set permissions in target machine<br />
+&gt;&gt;chmod 755 ~/.ssh</li>
+</ul>
+<blockquote>
+<blockquote><p>chmod 600 ~/.ssh/authorized_keys<br />
+Also turn off pass auth<br />
+passwordAuthentication no<br />
+to close the gate to all ssh root/admin/….@your_domain attempts</p></blockquote>
+</blockquote>
+<ul>
+<li>ensure ownership and group ownership of all non-root home directories are appropriate.</li>
+</ul>
+<blockquote>
+<blockquote><p>chown username -R ~/.ssh<br />
+chgrp username -R ~/.ssh</p></blockquote>
+</blockquote>
+<ul>
+<li>in client run daemon agent ssh</li>
+</ul>
+<blockquote>
+<blockquote><p>eval$(ssh-agent)</p>
+<p>ssh-add ~/.ssh/id_rsa</p></blockquote>
+</blockquote>
+<p>** SIMPLE WAY **</p>
+<p>ssh-copy-id username@ip</p>

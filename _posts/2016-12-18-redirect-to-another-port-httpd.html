@@ -1,0 +1,23 @@
+---
+layout: post
+title: Redirect to Another Port HTTPD
+author: Galuh D Wijatmiko
+categories: [Server]
+tags: [Service,httpd]
+---
+
+<p>Create virtual host, example<br />
+<!--more--></p>
+<blockquote><p>
+&lt;virtualhost *:80&gt;<br />
+ProxyPreserveHost On<br />
+ProxyRequests Off<br />
+ServerName downloads.wajatmaka.com<br />
+ServerAlias wajatmaka.com<br />
+ProxyPass / http://localhost:8080/<br />
+ProxyPassReverse / http://localhost:8080/<br />
+&lt;proxy&gt;<br />
+Order deny,allow<br />
+Allow from all<br />
+&lt;/proxy&gt;<br />
+&lt;/virtualhost&gt;</p></blockquote>

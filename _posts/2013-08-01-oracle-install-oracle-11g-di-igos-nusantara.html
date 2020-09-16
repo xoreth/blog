@@ -1,0 +1,430 @@
+---
+layout: post
+title: "[Oracle  11 G] Install Oracle 11G"
+author: Galuh D Wijatmiko
+categories: [Databases]
+tags: [oracle,database]
+---
+
+<p>install #oracle di #igosnusantara<br />
+Ekstrak file oracle :</p>
+<p><strong>unzip linux.x64_11gR2_database_1of2.zip</strong><br />
+<strong>unzip linux.x64_11gR2_database_2of2.zip</strong></p>
+<p>tentukan parameter kernel <!-- more --><br />
+<strong>sudo nano /etc/sysctl.conf</strong></p>
+<p><em>fs.aio-max-nr =    1048576</em><br />
+<em>fs.file-max = 6815744</em><br />
+<em>kernel.shmall =    2097152</em><br />
+<em>kernel.shmmax =    536870912</em><br />
+<em>kernel.shmmni =    4096</em><br />
+<em>kernel.sem=250 32000 100 128</em><br />
+<em>net.ipv4.ip_local_port_range=9000 65500</em><br />
+<em>net.core.rmem_default=262144</em><br />
+<em>net.core.rmem_max=4194304</em><br />
+<em>net.core.wmem_default=262144</em><br />
+<em>net.core.wmem_max=1048586</em></p>
+<p>menambahkan parameter limit pada <strong>/etc/security/limits.conf</strong></p>
+<p><em>#oracle    limits</em><br />
+<em>oracle            soft    nproc    2047</em><br />
+<em>oracle            hard    nproc    16384</em><br />
+<em>oracle            soft    nofile    1024</em><br />
+<em>oracle            hard    nofile    65536</em></p>
+<p>agar konfigurasi lebih mudah hapus firewall<br />
+<strong>sudo yum -y remove firewalld</strong></p>
+<p>#note : hanya untuk belajar.</p>
+<p>Set SELinux <strong>/etc/selinux/config</strong><br />
+<em>SELINUX=permissive</em></p>
+<p>Install software-software development tools<br />
+<strong>sudo yum groupinstall “Development Tools”</strong></p>
+<p>diantaranya :<br />
+<em> Group-Id: development-tools</em><br />
+<em> Description: These tools include general development tools such as git and cvs.</em><br />
+<em> Mandatory Packages:</em><br />
+<em>    gettext</em><br />
+<em> Default Packages:</em><br />
+<em>   =cvs</em><br />
+<em>   =diffstat</em><br />
+<em>   =doxygen</em><br />
+<em>    git</em><br />
+<em>   =patchutils</em><br />
+<em>   =rcs</em><br />
+<em>   =subversion</em><br />
+<em>   =systemtap</em><br />
+<em> Optional Packages:</em><br />
+<em>   -archmage</em><br />
+<em>   -buildbot</em><br />
+<em>   -bzr</em><br />
+<em>   -bzr-explorer</em><br />
+<em>   -colordiff</em><br />
+<em>   -cvs2cl</em><br />
+<em>   -cvsgraph</em><br />
+<em>   -cvsps</em><br />
+<em>   -darcs</em><br />
+<em>   -dejagnu</em><br />
+<em>   -expect</em><br />
+<em>   -gambas3-ide</em><br />
+<em>   -giggle</em><br />
+<em>   -git-annex</em><br />
+<em>   -git-cola</em><br />
+<em>   -git2cl</em><br />
+<em>   -gitg</em><br />
+<em>   -gtranslator</em><br />
+<em>   -highlight</em><br />
+<em>   -lcov</em><br />
+<em>   -manedit</em><br />
+<em>    meld</em><br />
+<em>   -mercurial</em><br />
+<em>   -monotone</em><br />
+<em>   -mr</em><br />
+<em>   -nemiver</em><br />
+<em>   -qgit</em><br />
+<em>   -quilt</em><br />
+<em>   -rapidsvn</em><br />
+<em>   -robodoc</em><br />
+<em>   -scanmem</em><br />
+<em>   -svn2cl</em><br />
+<em>   -tailor</em><br />
+<em>   -tig</em><br />
+<em>   -tkcvs</em><br />
+<em>   -tortoisehg</em><br />
+<em>   -translate-toolkit</em><br />
+<em>   -utrac</em></p>
+<p>Install sistem tools :<br />
+<strong>sudo yum groupinstall “System Tools”</strong></p>
+<p><em>Loaded plugins: priorities</em></p>
+<p><em>Group: System Tools</em><br />
+<em> Group-Id: system-tools</em><br />
+<em> Description: This group is a collection of various tools for the system, such as the client for connecting to SMB shares and tools to monitor network traffic.</em><br />
+<em> Default Packages:</em><br />
+<em>   =BackupPC</em><br />
+<em>    NetworkManager-l2tp</em><br />
+<em>    NetworkManager-openconnect</em><br />
+<em>    NetworkManager-openvpn</em><br />
+<em>    NetworkManager-vpnc</em><br />
+<em>   =bonnie++</em><br />
+<em>    chrony</em><br />
+<em>   =cifs-utils</em><br />
+<em>   =jigdo</em><br />
+<em>    libreswan</em><br />
+<em>    nmap</em><br />
+<em>    ntfs-3g</em><br />
+<em>    openconnect</em><br />
+<em>   =openldap-clients</em><br />
+<em>    openvpn</em><br />
+<em>    samba-client</em><br />
+<em>    screen</em><br />
+<em>   =setserial</em><br />
+<em>    tigervnc</em><br />
+<em>    vpnc</em><br />
+<em>   =xdelta</em><br />
+<em>    yum-utils</em><br />
+<em>   =zisofs-tools</em><br />
+<em>    zsh</em><br />
+<em> Optional Packages:</em><br />
+<em>   -PackageKit-command-not-found</em><br />
+<em>   -aide</em><br />
+<em>   -aircrack-ng</em><br />
+<em>   -airsnort</em><br />
+<em>   -am-utils</em><br />
+<em>   -amanda-client</em><br />
+<em>   -apcupsd</em><br />
+<em>   -apcupsd-gui</em><br />
+<em>   -apg</em><br />
+<em>   -apt</em><br />
+<em>   -arc</em><br />
+<em>   -arj</em><br />
+<em>   -arptables_jf</em><br />
+<em>   -arpwatch</em><br />
+<em>    autofs</em><br />
+<em>   -avahi-tools</em><br />
+<em>   -bochs</em><br />
+<em>    cabextract</em><br />
+<em>   -catfish</em><br />
+<em>   -cfengine</em><br />
+<em>   -chrpath</em><br />
+<em>   -conman</em><br />
+<em>   -connect-proxy</em><br />
+<em>   -convmv</em><br />
+<em>   -crack</em><br />
+<em>   -crash</em><br />
+<em>    createrepo</em><br />
+<em>   -dar</em><br />
+<em>   -ddclient</em><br />
+<em>   -denyhosts</em><br />
+<em>    dkms</em><br />
+<em>   -dnrd</em><br />
+<em>   -dstat</em><br />
+<em>   -dtach</em><br />
+<em>    ebtables</em><br />
+<em>   -ed2k_hash</em><br />
+<em>   -eiciel</em><br />
+<em>   -emelfm2</em><br />
+<em>    enca</em><br />
+<em>   -environment-modules</em><br />
+<em>   -epylog</em><br />
+<em>   -etherbat</em><br />
+<em>   -ettercap</em><br />
+<em>   -fatsort</em><br />
+<em>   -fdupes</em><br />
+<em>   -fedora-package-config-apt</em><br />
+<em>   -fedora-package-config-smart</em><br />
+<em>   -festival</em><br />
+<em>   -foremost</em><br />
+<em>   -freeze</em><br />
+<em>    fuse</em><br />
+<em>   -fwbuilder</em><br />
+<em>   -fwknop</em><br />
+<em>   -fwrestart</em><br />
+<em>   -ganglia</em><br />
+<em>    geoclue</em><br />
+<em>   -ghasher</em><br />
+<em>   -ghex</em><br />
+<em>   -gigolo</em><br />
+<em>   -gkrellm</em><br />
+<em>   -gnokii</em><br />
+<em>   -gnutls-utils</em><br />
+<em>   -greadelf</em><br />
+<em>   -grepmail</em><br />
+<em>   -grsync</em><br />
+<em>    gssdp</em><br />
+<em>   -gtkhash</em><br />
+<em>   -gtkterm</em><br />
+<em>    gupnp</em><br />
+<em>   -gxemul</em><br />
+<em>   -hercules</em><br />
+<em>    hfsplus-tools</em><br />
+<em>    htop</em><br />
+<em>   -hyperestraier</em><br />
+<em>   -ibmonitor</em><br />
+<em>   -iftop</em><br />
+<em>   -inadyn-mt</em><br />
+<em>   -incron</em><br />
+<em>   -iotop</em><br />
+<em>   -ip6sic</em><br />
+<em>   -ipsec-tools</em><br />
+<em>   -ircp-tray</em><br />
+<em>   -isic</em><br />
+<em>   -jfbterm</em><br />
+<em>   -john</em><br />
+<em>   -kdirstat</em><br />
+<em>   -keychain</em><br />
+<em>   -ksmarttray</em><br />
+<em>   -limph</em><br />
+<em>   -lirc</em><br />
+<em>   -liveusb-creator</em><br />
+<em>   -lzop</em><br />
+<em>   -macchanger</em><br />
+<em>    mc</em><br />
+<em>   -mmv</em><br />
+<em>   -mrtg</em><br />
+<em>   -mtx</em><br />
+<em>   -munin</em><br />
+<em>   -nagios</em><br />
+<em>   -net-snmp-utils</em><br />
+<em>   -netgo</em><br />
+<em>   -nethogs</em><br />
+<em>   -netstat-nat</em><br />
+<em>   -nfswatch</em><br />
+<em>   -nmap-frontend</em><br />
+<em>   -noip</em><br />
+<em>   -nomarch</em><br />
+<em>   -nrg2iso</em><br />
+<em>    ntp</em><br />
+<em>   -ntp-perl</em><br />
+<em>    ntpdate</em><br />
+<em>   -nut</em><br />
+<em>   -nx</em><br />
+<em>   -obexfs</em><br />
+<em>   -obexftp</em><br />
+<em>   -oddjob</em><br />
+<em>   -oddjob-mkhomedir</em><br />
+<em>   -p0f</em><br />
+<em>    p7zip</em><br />
+<em>   -p7zip-plugins</em><br />
+<em>   -par2cmdline</em><br />
+<em>    pbzip2</em><br />
+<em>   -portecle</em><br />
+<em>   -powerman</em><br />
+<em>    powertop</em><br />
+<em>   -prelude-manager</em><br />
+<em>   -procinfo</em><br />
+<em>   -puppet</em><br />
+<em>   -pwgen</em><br />
+<em>   -qdbm</em><br />
+<em>   -qstat</em><br />
+<em>   -radeontool</em><br />
+<em>    rdesktop</em><br />
+<em>   -rdiff-backup</em><br />
+<em>   -rear</em><br />
+<em>   -remmina</em><br />
+<em>   -remmina-plugins-nx</em><br />
+<em>   -remmina-plugins-rdp</em><br />
+<em>   -remmina-plugins-telepathy</em><br />
+<em>   -remmina-plugins-xdmcp</em><br />
+<em>   -reptyr</em><br />
+<em>   -rmanage</em><br />
+<em>   -rootsh</em><br />
+<em>   -rsnapshot</em><br />
+<em>   -sabayon</em><br />
+<em>   -scrub</em><br />
+<em>   -sec</em><br />
+<em>   -shorewall</em><br />
+<em>   -smart</em><br />
+<em>   -smart-gui</em><br />
+<em>    socat</em><br />
+<em>   -stripesnoop</em><br />
+<em>   -swaks</em><br />
+<em>   -swatch</em><br />
+<em>   -synaptic</em><br />
+<em>   -syslog-ng</em><br />
+<em>   -sysstat</em><br />
+<em>   -testdisk</em><br />
+<em>   -tiobench</em><br />
+<em>   -tn5250</em><br />
+<em>   -torque-client</em><br />
+<em>   -torque-gui</em><br />
+<em>   -ttywatch</em><br />
+<em>   -tunctl</em><br />
+<em>   -unison213</em><br />
+<em>   -unison227</em><br />
+<em>   -upx</em><br />
+<em>   -uucp</em><br />
+<em>   -vnstat</em><br />
+<em>   -w_scan</em><br />
+<em>    wine</em><br />
+<em>   -wireshark-gnome</em><br />
+<em>   -wlassistant</em><br />
+<em>   -x3270-x11</em><br />
+<em>   -xmobar</em><br />
+<em>   -xsel</em><br />
+<em>   -xsupplicant</em><br />
+<em>   -zidrav</em></p>
+<p>Lalu install tools untuk builder</p>
+<p><strong>#yum install binutils</strong><br />
+<strong>#yum install compat-libstdc++-33</strong><br />
+<strong>#yum install compat-libstdc++-33.i686</strong><br />
+<strong>#yum install elfutils-libelf</strong><br />
+<strong>#yum install elfutils-libelf-devel</strong><br />
+<strong>#yum install gcc</strong><br />
+<strong>#yum install gcc-c++</strong><br />
+<strong>#yum install glibc</strong><br />
+<strong>#yum install glibc.i686</strong><br />
+<strong>#yum install glibc-common</strong><br />
+<strong>#yum install glibc-devel</strong><br />
+<strong>#yum install glibc-headers</strong><br />
+<strong>#yum install glibc-devel.i686</strong><br />
+<strong>#yum install zsh</strong><br />
+<strong>#yum install libaio</strong><br />
+<strong>#yum install libaio.i686</strong><br />
+<strong>#yum install libaio-devel</strong><br />
+<strong>#yum install libaio-devel.i686</strong><br />
+<strong>#yum install libgcc</strong><br />
+<strong>#yum install libgcc.i686</strong><br />
+<strong>#yum install libstdc++</strong><br />
+<strong>#yum install libstdc++.i686</strong><br />
+<strong>#yum install libstdc++-devel</strong><br />
+<strong>#yum install make</strong><br />
+<strong>#yum install numactl</strong><br />
+<strong>#yum install numactl-devel</strong><br />
+<strong>#yum install sysstat</strong><br />
+<strong>#yum install unixODBC</strong><br />
+<strong>#yum install unixODBC.i686</strong><br />
+<strong>#yum install unixODBC-devel</strong><br />
+<strong>#yum install unixODBC-devel.i686</strong></p>
+<p>membuat user dan group oracle</p>
+<p><strong>#groupadd oinstall</strong><br />
+<strong>#groupadd dba</strong><br />
+<strong>#useradd -g oinstall -G dba oracle</strong><br />
+<strong>#passwd oracle</strong></p>
+<p>user oracle jadikan sudoers:<br />
+<strong>sudo nano /etc/sudoers</strong><br />
+tambahkan<br />
+<em>oracle ALL=(ALL) ALL</em></p>
+<p>Sistem akan ditanamkan di /opt maka<br />
+membuat direktori :</p>
+<p><strong>sudo mkdir -p /opt/oracle/product/11.2.0/db_1</strong></p>
+<p>Mengubah owner :</p>
+<p><strong>sudo chown -R oracle:oinstall /opt/oracle</strong></p>
+<p>Mengubah akses :</p>
+<p><strong>sudo chmod -R 775 /opt/oracle</strong></p>
+<p>non-aktifkan host<br />
+<strong>xhost +</strong></p>
+<p>[1]Melihat hostname<br />
+<strong>hostname</strong><br />
+output : igosnusantara</p>
+<p>membuat environment path untuk oracle pada shell. jika menggunakan zsh maka file konfigurasi ~/.zshrc jika bash ~/.bashrc<br />
+sebelumnya login pada user oracle :<br />
+<strong>su oracle</strong></p>
+<p>lihat shell :<br />
+<strong>echo $SHELL</strong></p>
+<p>jika bash<br />
+<strong>nano  ~/.bashrc</strong><br />
+jika zsh<br />
+<strong>nano ~/.zshrc</strong></p>
+<p>lalu isi file dibawah ini pada .bashrc/.zshrc</p>
+<p><em># Oracle Settings</em><br />
+<em>TMP=/tmp; export TMP</em><br />
+<em>TMPDIR=$TMP; export TMPDIR</em></p>
+<p><em>ORACLE_HOSTNAME=igosnusantara; export ORACLE_HOSTNAME</em><br />
+<em>ORACLE_UNQNAME=basedata; export ORACLE_UNQNAME</em><br />
+<em>ORACLE_BASE=/opt/oracle; export ORACLE_BASE</em><br />
+<em>ORACLE_HOME=$ORACLE_BASE/product/11.2.0/db_1; export ORACLE_HOME</em><br />
+<em>ORACLE_SID=basedata; export ORACLE_SID</em><br />
+<em>ORACLE_TERM=xterm; export ORACLE_TERM</em><br />
+<em>PATH=/usr/sbin:$PATH; export PATH</em><br />
+<em>PATH=$ORACLE_HOME/bin:$PATH; export PATH</em></p>
+<p><em>LD_LIBRARY_PATH=$ORACLE_HOME/lib:/lib:/usr/lib; export LD_LIBRARY_PATH</em><br />
+<em>CLASSPATH=$ORACLE_HOME/JRE:$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib; export CLASSPATH</em></p>
+<p>##=====================================================</p>
+<p>ORACLE_HOSTNAME,  didapat pada [1]<br />
+ORACLE_UNQNAME, nama database<br />
+ORACLE_BASE, basis direktori  oracle<br />
+ORACLE_HOME, beranda direktori oracle</p>
+<p>masuk pada folder oracle yang sudah di ekstrak dan jalankan untuk instalasi :<br />
+<strong>./runInstaller</strong></p>
+<p>proses instalasi :<br />
+<strong>[a]Installation option</strong><br />
+hapus ceklis pada ‘I wish to recieve security update via my Oracle suport’<br />
+lalu next<br />
+<strong>[b]Grid options</strong><br />
+pilih opsi : install database software only<br />
+lalu next<br />
+<strong>[c]install type</strong><br />
+pilih opsi : single instance database installation<br />
+lalu next<br />
+<strong>[d]Product language</strong><br />
+pilih bahasa inggris atau bahasa indonesia<br />
+tekan next<br />
+<strong>[e]database edition</strong><br />
+pilih enterprise edition<br />
+tekan next<br />
+<strong>[f]installation location</strong><br />
+base : /opt/oracle<br />
+home : /opt/oracle/product/11.2.0/db_1<br />
+<strong>[g]create inventory</strong><br />
+sudo mkdir -p /opt/oraInventory<br />
+sudo chown oracle:oinstall -R /opt/oraInventory<br />
+inventory direktori : /opt/oraInventory<br />
+orainventory group : oinstall<br />
+<strong>[h]operating system group</strong><br />
+OSDBA(Database Administrator Group) : dba<br />
+OSOPER(Database Operator) : dba<br />
+<strong>[i]prerequisite Checks</strong><br />
+ceklis : ignore all<br />
+next<br />
+<strong>[j]summary</strong><br />
+tekan button finish<br />
+<strong>[k]install product</strong><br />
+dalam proses instalasi ini terdapat error 2 kali. ketentuan abaikan lanjutkan atau solving trouble dengan membaca log.</p>
+<p>salah satunya adalah ins_emagent.mk</p>
+<p>solving :</p>
+<p>ganti:</p>
+<pre>$(SYSMANBIN)emdctl:
+        $(MK_EMAGENT_NMECTL)</pre>
+<p>dengan:</p>
+<pre>$(SYSMANBIN)emdctl:
+        $(MK_EMAGENT_NMECTL) -lnnz11</pre>
+<p>pada opsi execute root scipt jalankan :</p>
+<p><em><strong> sudo sh /opt/oraInventory/orainstRoot.sh</strong></em><br />
+<em><strong>sudo sh $ORACLE_HOME/oot.sh</strong></em></p>
+<p><strong>[l]finish</strong></p>

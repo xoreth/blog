@@ -1,0 +1,444 @@
+---
+layout: post
+title: Transparent with Squid Proxy
+author: Galuh D Wijatmiko
+categories: [Networks,Server]
+tags: [squid]
+---
+
+<h2>Install Squid, SquidGuard and Sarg</h2>
+<pre><code>
+yum install squidGuard sarg squid-helpers squid-debuginfo squid perl-Crypt-OpenSSL openssl httpd httpd-tools mod_ssl gd gd-devel make perl-GD</code></pre>
+<h3>Configuration Squid</h3>
+<p><!--more--><br />
+<strong>1. Make Certificates</strong></p>
+<pre><code>cd /var/opt/squid
+mkdir certs<br />
+cd certs<br /> 
+openssl req -new -newkey rsa:2048 -days 36500 -nodes -x509 -keyout proxyCA.pem -out proxyCA.pem<br />
+chown squid:squid ../certs <br />
+cd .. <br />
+mkdir -p ssldb <br />
+/usr/lib64/squid/ssl_crtd -s /var/opt/squid/ssldb/ssl_db -M 100</code></pre>
+<p><strong>2. Kernel Parameter</strong><br />
+configure in /etc/sysctl.conf</p>
+<pre><code>
+net.ipv4.ip_forward = 1 <br />
+net.ipv4.conf.default.rp_filter = 0  <br />
+net.ipv4.conf.default.accept_source_route = 0 <br />
+kernel.core_uses_pid = 1 <br />
+net.ipv4.tcp_syncookies = 1 <br />
+kernel.msgmnb = 65536 <br />
+kernel.msgmax = 65536 <br /> 
+kernel.shmmax = 68719476736 <br />
+kernel.shmall = 4294967296 <br />
+kernel.core_uses_pid=1 <br />
+kernel.ctrl-alt-del = 0 <br />
+kernel.kptr_restrict = 2 <br />
+kernel.randomize_va_space = 2 <br />
+kernel.sysrq = 0 <br />
+net.ipv4.conf.all.accept_redirects = 0 <br />
+net.ipv4.conf.all.accept_source_route = 0 <br />
+net.ipv4.conf.all.bootp_relay = 0 <br />
+net.ipv4.conf.all.forwarding = 0 <br />
+net.ipv4.conf.all.log_martians = 1 <br />
+net.ipv4.conf.all.mc_forwarding = 0 <br />
+net.ipv4.conf.all.proxy_arp = 0 <br />
+net.ipv4.conf.all.rp_filter = 1 <br />
+net.ipv6.conf.default.disable_ipv6 = 1 <br />
+net.ipv4.conf.all.send_redirects = 0 <br />
+net.ipv4.conf.default.accept_redirects = 0 <br />
+net.ipv4.conf.default.accept_source_route = 0 <br />
+net.ipv4.conf.default.log_martians = 1 <br />
+net.ipv4.icmp_echo_ignore_broadcasts = 1 <br />
+net.ipv4.icmp_ignore_bogus_error_responses = 1 <br />
+net.ipv4.tcp_syncookies = 1 <br />
+net.ipv4.tcp_timestamps = 0 <br />
+net.ipv6.conf.all.disable_ipv6 = 1 <br />
+net.ipv6.conf.default.disable_ipv6 = 1 <br />
+net.ipv6.conf.lo.disable_ipv6 = 1 <br />
+net.ipv6.conf.all.accept_redirects = 0<br />
+net.ipv6.conf.all.accept_source_route = 0<br />
+net.ipv6.conf.default.accept_redirects = 0<br />
+net.ipv6.conf.default.accept_source_route = 0<br />
+vm.swappiness = 10<br />
+fs.file-max = 65535<br />
+net.core.rmem_default = 262144<br />
+net.core.rmem_max = 262144<br />
+net.core.wmem_default = 262144<br />
+net.core.wmem_max = 262144<br />
+net.ipv4.tcp_rmem = 4096 87380 8388608<br />
+net.ipv4.tcp_wmem = 4096 65536 8388608<br />
+net.ipv4.tcp_mem = 4096 4096 4096<br />
+net.ipv4.tcp_low_latency = 1<br />
+net.core.netdev_max_backlog = 4000<br />
+net.ipv4.ip_local_port_range = 1024 65000<br />
+net.ipv4.tcp_max_syn_backlog = 16384<br />
+net.ipv4.tcp_ecn = 0</code></pre>
+<p>and then reload parameter</p>
+<pre><code>sysctl -p</code></pre>
+<p><strong>3. IP Tables</strong><br />
+replace file iptables in /etc/sysconfig/</p>
+<pre><code>
+*nat <br />
+:PREROUTING ACCEPT [0:0] <br />
+:POSTROUTING ACCEPT [0:0] <br />
+:OUTPUT ACCEPT [0:0] <br />
+-t nat -A PREROUTING -p tcp -m tcp --dport 443 -j DNAT --to-destination 10.32.16.222:3127  <br />
+-t nat -A PREROUTING -p tcp -m tcp --dport 80 -j DNAT --to-destination 10.32.16.222:3128 <br />
+-t nat -A POSTROUTING -j MASQUERADE<br />
+COMMIT<br />
+*filter<br />
+:INPUT ACCEPT [0:0]<br />
+:FORWARD ACCEPT [0:0]<br />
+:OUTPUT ACCEPT [3455:321198]<br />
+:LOGGING - [0:0]<br />
+-A INPUT -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT <br />
+-A INPUT -p icmp -j ACCEPT<br />
+-A INPUT -i lo -j ACCEPT<br />
+-A INPUT -i eth0 -j ACCEPT<br />
+-A INPUT -p tcp -s 10.32.5.0/24 -j ACCEPT<br />
+-A INPUT -p tcp -s 10.32.15.0/24 -j ACCEPT<br />
+-A INPUT -p tcp -s 10.32.6.0/24 -j ACCEPT<br />
+-A INPUT -p tcp -s 10.32.7.0/24 -j ACCEPT<br />
+-A INPUT -p tcp -s 10.32.8.0/24 -j ACCEPT<br />
+-A INPUT -p tcp -s 10.32.9.0/24 -j ACCEPT<br />
+-A INPUT -p tcp -s 10.32.10.0/24 -j ACCEPT<br />
+-A INPUT -p tcp -s 10.32.11.0/24 -j ACCEPT<br />
+-A INPUT -p tcp -s 10.32.13.0/24 -j ACCEPT<br />
+-A INPUT -p tcp -s 10.32.14.0/24 -j ACCEPT<br />
+-A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT<br />
+-A INPUT -p tcp -m state --state NEW -m multiport --dports 80,443,3127,3128,8081 -j ACCEPT<br />
+-A INPUT -p tcp -m state --state NEW,ESTABLISHED -m multiport --dports 3000,3001 -j ACCEPT<br />
+-A INPUT -j LOGGING<br />
+-A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7 <br />
+-A LOGGING -m limit --limit 5/min -j LOG --log-prefix "Incoming Dropped: " --log-level 5<br />
+-A INPUT -j DROP<br />
+COMMIT</code></pre>
+<p><strong>4. Routing</strong><br />
+create file route-eth0 in /etc/sysconfig/network-scripts/</p>
+<pre><code>
+10.32.5.0/24  via 10.32.16.221<br />
+10.32.15.0/24 via 10.32.16.221<br />
+10.32.6.0/24 via 10.32.16.221<br />
+10.32.7.0/24 via 10.32.16.221<br />
+10.32.8.0/24 via 10.32.16.221<br />
+10.32.9.0/24 via 10.32.16.221<br />
+10.32.10.0/24 via 10.32.16.221<br />
+10.32.11.0/24 via 10.32.16.221<br />
+10.32.13.0/24 via 10.32.16.221<br />
+10.32.14.0/24 via 10.32.16.221</code></pre>
+<p><strong>5. Squid Config</strong><br />
+Configuration main squid.conf in /etc/squid/</p>
+<pre><code>...<br />
+cache_dir ufs /var/spool/squid 400000 32 512 <br />
+coredump_dir /var/spool/squid<br />
+http_port 8181<br />
+http_port 3128 intercept<br />
+https_port 3127 intercept ssl-bump cert=/var/opt/squid/certs/proxyCA.pem<br />
+sslcrtd_program  /usr/lib64/squid/ssl_crtd -s /var/opt/squid/ssldb/ssl_db -M 100<br />
+...</code></pre>
+<p>details can be download : <a href="https://gist.github.com/wajatmaka/223e28d86153eb5784a56c1bf0f64842">Link</a><br />
+Details:<br />
+1. Port 8181 is using for trapping if there is bypassing squid server<br />
+2. Port 3128 is using in traffic http<br />
+3. Port 3127 is using in traffic https </p>
+<p><strong>6. Create Cache in Squid</strong><br />
+move to directory /var/spool/squid/</p>
+<pre><code>cd /var/spool/squid/<br />
+squid -z<br />
+chown squid:squid -R /var/spool/squid</code></pre>
+<p><strong>7. Manage Service Squid</strong></p>
+<pre><code>service squid start</code></pre>
+<p>or</p>
+<pre><code>/etc/init.d/squid start</code></pre>
+<p>enable startup</p>
+<pre><code>chkconfig squid on</code></pre>
+<h3>Configuration SquidGuard</h3>
+<p><strong>1. Configure Blacklist Site</strong><br />
+Download Blacklist list in <a href="http://www.shallalist.de/Downloads/shallalist.tar.gz">URL</a><br />
+Extract All file blacklist in /var/squidGuard/db/blacklist<br />
+Listing blacklist : </p>
+<pre><code>
+....<br />
+adult<br />
+blacklist<br />
+malware<br />
+ddos<br />
+filesharing<br />
+mixed_adult<br />
+updatesites<br />
+whitelist<br />
+...</code></pre>
+<p><strong>2. Create ACL SquidGuard</strong><br />
+Common Pattern ACL is Source, Destination and ACL<br />
+Source : </p>
+<pre><code>src  mgt {<br />
+ ip 10.32.14.0/255.255.255.0<br />
+}</code></pre>
+<p>Destination :</p>
+<pre><code>dest job {<br />
+ domainlist	job/domains<br />
+ urllist         job/urls<br />
+ redirect        https://squidshare.waajtmaka.com/job.html?<br />
+}</code></pre>
+<p>ACL :</p>
+<pre><code>acl {<br />
+   mgt {<br />
+     pass   !job  all<br />
+}</code></pre>
+<p>Information above is the mean IP segmen 10.32.14.0/24 deny access web JOB database, but anothet that is allowed.<br />
+<strong>3. Generate Destination</strong><br />
+Many Destination DB blacklist, for generate can be do, following : </p>
+<pre><code>cd /var/squidGuard/db/blacklists</code></pre>
+<p>and copy this <a href="https://gist.github.com/wajatmaka/40e1b0d24bcb131dabccfc8c847a5ab7">script </a>to /var/squidGuard/db/blacklists<br />
+Copy result hasil.txt to /etc/squid/squidGuard.conf after the end line source Configuration existing : </p>
+<pre><code>############# TIME RULES ####################<br />
+time free {<br />
+     weekly mtwhf 08:00-09:00 12:00-13:00 18:00-20:00<br />
+}<br />
+........<br />
+############# SOURCE ADDRESSES ####################<br />
+src  ga {<br />
+     ip 10.32.11.0/255.255.255.0<br />
+}<br />
+........<br />
+############# DESTINATION ADDRESSES ####################<br />
+dest dewasa {<br />
+       domainlist	dewasa/domains<br />
+       urllist		dewasa/urls<br />
+       expressionlist  dewasa/expressions<br />
+       redirect 	https://squidshare.wajatmaka.com/banned.html?<br />
+}<br />
+........<br />
+############# ACCESS CONTROL LIST ####################<br />
+acl {<br />
+   ga within free {<br />
+       pass  boleh !manga !blacklist !malware !job !banned  !ddos !job !malware !porn !dewasa !iklan !weapons !social_networks  !adult !chat   any<br />
+   }<br />
+   .......
+   default {<br />
+       pass 	    none<br />
+       redirect	https://squidshare.wajatmaka.com/workinghour.html?<br />
+   }<br />
+}</code></pre>
+<p>Configuration Full can be <a href="https://gist.github.com/wajatmaka/21a0a51f793955b74d48c9e06ae66485">download</a><br />
+<strong>4. Add Configuration SquidGuard in Squid</strong><br />
+add in /etc/squid/squid.conf after end line acl </p>
+<pre><code>url_rewrite_program /usr/bin/squidGuard -c /etc/squid/squidGuard.conf</code></pre>
+<p><strong>5. Generate DB SquidGuard</strong></p>
+<pre><code>squidGuard -b -d -C all<br />
+chown squid:squid -R /var/squidGuard/</code></pre>
+<p><strong>6. Manage Service SquidGuard</strong></p>
+<pre><code>chkconfig squidGuard on<br />
+service squid restart</code></pre>
+<p>or</p>
+<pre><code>/etc/init.d/squid restart</code></pre>
+<h3>Configuration SARG</h3>
+<p><strong>1. Create VHost for SARG</strong><br />
+enable mod ssl in apache, for checking</p>
+<pre><code>httpd -t -D DUMP_MODULES | grep ssl</code></pre>
+<p>add virtualhost in /etc/httpd/conf.d/ssl.conf</p>
+<pre><code><virtualhost 10.32.16.222:443><br />
+############### DOCUMENT ROOT ###################<br />
+       DocumentRoot "/home/squid/sarg/reports"<br />
+       ServerName squidshare.roomit.com<br />
+       DirectoryIndex at_domains_index.html index.html index.html.var index.shtml index.php index.htm<br />
+       \<Directory \"/home/squid/sarg/reports\"\><br />
+         Options -Indexes -Includes<br />
+         Order deny,allow<br />
+         deny from 10.32.6.0/24<br />
+         deny from 10.32.14.0/24<br />
+         deny from 10.32.9.0/24<br />
+         deny from 10.32.7.0/24<br />
+         deny from 10.32.13.0/24<br />
+         deny from 10.32.11.0/24<br />
+         allow from 10.32.5.0/24<br />
+       \</Directory\><br />
+       ........
+</virtualhost> </code></pre>
+<p>Full Configuration can be <a href="https://gist.github.com/wajatmaka/6e2ef792e3f12910d949160b6d451792">download</a><br />
+<strong>2. Secure VHost for SARG</strong><br />
+add paramater in /etc/httpd/conf.d/ssl.conf before line VirtualHost</p>
+<pre><code>Header always set Strict-Transport-Security "max-age=63072000; includeSubdomains; preload"<br />
+Header edit Set-Cookie ^(.*)$ $1;HttpOnly;Secure<br />
+Header always append X-Frame-Options SAMEORIGIN<br />
+ServerTokens Prod<br />
+ServerSignature Off<br />
+FileETag None<br />
+TraceEnable off</code></pre>
+<p>Add reports SARG with symbolic link</p>
+<pre><code>ln -s /home/squid/sarg/reports /var/www/html</code></pre>
+<p><strong>3. Optimize Configuration SARG</strong><br />
+Change configuration in /etc/sarg/sarg.conf</p>
+<pre><code>access_log /var/log/squid/access.log<br />
+output_dir /home/squid/sarg/reports<br />
+date_format e<br />
+overwrite_report yes</code></pre>
+<p><strong>4. Change IP to Hostname in SARG</strong><br />
+Create file wajatmaka.usertab in /etc/sarg/, list of name people, the following :</p>
+<pre><code> ......<br />
+10.32.6.6       dev.DinaFarhah-PC<br />
+10.32.6.7       dev.GiginGinanjar-PC<br />
+.......<br />    </code></pre>
+<p>add parameter /etc/sarg/sarg.conf</p>
+<pre><code>usertab /etc/sarg/wajatmaka.usertab</code></pre>
+<p><strong>5. Generate Report in SARG</strong><br />
+Before generate restart apache </p>
+<pre><code>/etc/init.d/httpd restart</code></pre>
+<p>Generate report</p>
+<pre><code>sarg -x</code></pre>
+<p>check using browser, access url https://localhost/</p>
+<h3>Customize Page Banned in Squid</h3>
+<p>Download <a href="https://github.com/wajatmaka/wjtConf/raw/master/Squid/PageError/page-error-wjt.tar.gz">Link</a><br />
+make symbolic link</p>
+<pre><code>ln -sf /var/www/html/page-error/banned.html /var/www/html/reports/ <br />
+ln -sf /var/www/html/page-error/job.html /var/www/html/reports/<br />
+ln -sf /var/www/html/page-error/iklan.html /var/www/html/reports/<br />
+ln -sf /var/www/html/page-error/workinghour.html /var/www/html/reports/<br />
+ln -s /var/www/html/page-error/img/squid-icon.png  /var/www/html/reports/images/</code></pre>
+<p>For manage redirecting we can manage in /etc/squid/squidGuard.conf. In Destination add line </p>
+<pre><code>redirect https://squidshare.wajatmaka.com/banned.html?</code></pre>
+<p>using ? in end rows. </p>
+<h3>Optimize Parameter in Squid</h3>
+<p>We can tuning squid change value paramater following : </p>
+<pre><code>cache_mem 100 MB <br />
+maximum_object_size_in_memory 50 KB  <br />
+memory_cache_mode always  <br />
+minimum_object_size 0 KB   <br />
+maximum_object_size 200 MB   <br />
+memory_pools off   <br />
+quick_abort_min 0 KB   <br />
+quick_abort_max 0 KB  <br />
+log_icp_queries off  <br />
+cache_replacement_policy heap LFUDA  <br />
+memory_replacement_policy heap LFUDA  <br />
+half_closed_clients off  <br />
+max_filedesc 4096 <br />
+redirect_children 37 <br />
+max_filedesc 65535 <br />
+client_db off <br />
+hosts_file /etc/hosts</code></pre>
+<p>For Limit File header will be downloading :</p>
+<pre><code>########### SOURCE ########### <br />
+acl developer src 10.32.6.0/24  # VLAN 6 <br />
+acl telco src 10.32.9.0/24      # VLAN 9 <br />
+acl marketing src 10.32.13.0/24 # VLAN 11 <br />
+acl hrd src 10.32.8.0/24        # VLAN 8 <br />
+acl finance src 10.32.7.0/24    # VLAN 7 <br />
+acl ga src 10.32.11.0/24        # VLAN 10 <br />
+########### BANDWIDTH LIMIT FOR DOWNLOAD ########<br />
+reply_body_max_size 300 MB   developer<br />
+reply_body_max_size 300 MB   telco<br />
+reply_body_max_size 100 MB   marketing<br />
+reply_body_max_size 100 MB   hrd<br />
+reply_body_max_size 100 MB   finance<br />
+reply_body_max_size 100 MB   ga</code></pre>
+<h3>SquidGuard Managenment</h3>
+<p><strong>1. Add User IP</strong><br />
+If there any workstation/server cannot be access internet, but can only access website http, example can be access http://mirror.centos.org. we can add in <em>/etc/squid/squidGuard.conf</em>. Classification of ip, example we add ip 10.32.15.101 so this is using source qca. add in end of source qca </p>
+<pre><code>src qca {<br />
+   .....<br />
+   ip 10.32.15.41<br />
+   ip 10.32.15.70<br />
+   ip 10.32.15.242<br />
+   ip 10.32.15.136<br />
+   ......<br />
+   10.32.15.101<br />
+}</code></pre>
+<p>Reload squid </p>
+<pre><code>/etc/init.d/squid reload</code></pre>
+<p>or</p>
+<pre><code>squid -k reconfigure -f /etc/squid/squid.conf</code></pre>
+<p><strong>2. Block Domains</strong><br />
+example, we will block website http://localhost going to /var/squidGuard/db/blacklists/ add in file vi blacklist/domains in end of file rows without http:// </p>
+<pre><code>.......<br />
+youtube.com<br />
+blog.wajatmaka.com</code></pre>
+<p>so, update db using </p>
+<pre><code>squidGuard -C blacklist/domains</code></pre>
+<p>Reload squid</p>
+<pre><code>/etc/init.d/squid reload</code></pre>
+<p>or</p>
+<pre><code>squid -k reconfigure -f /etc/squid/squid.conf</code></pre>
+<p><strong>3. Unblock Domains</strong><br />
+example, we will allow website https://cimbniaga.com going to /var/squidGuard/db/blacklists/</p>
+<pre><code>grep "cimbniaga" */*</code></pre>
+<p>and output is</p>
+<pre><code>blacklistlist/domains:cimbniaga.com</code></pre>
+<p>search and remove cimbniaga.com in file vi blacklist/domains. </p>
+<pre><code>.......<br />
+<em>cimbniaga.com</em><br />
+youtube.com<br />
+.......</code></pre>
+<p>so, update db using</p>
+<pre><code>squidGuard -C blacklist/domains</code></pre>
+<p>Reload squid</p>
+<pre><code>/etc/init.d/squid reload</code></pre>
+<p>or</p>
+<pre><code>squid -k reconfigure -f /etc/squid/squid.conf</code></pre>
+<h3>Squid Monitoring, Problem And Solving</h3>
+<p>ree RAM must greater then 230 MB, if not squid will collapse</p>
+<pre><code>free -m | grep Mem | awk -F" " '{print $4,"MB"}'</code></pre>
+<p>Number of squidGuard child for link redirection must be less then 24, if child greater then 24 then RAM usage will increase. If squidguard child is limited, then request will be queued for url filtering.</p>
+<pre><code>
+[root@squidshare senops]# cat /var/log/squid/cache.log| grep -i warning
+| grep -i busy2017/04/25 10:38:13 kid1| WARNING: All 40/40 redirector
+processes are busy.2017/04/25 10:46:32 kid1| WARNING: All 40/40
+redirector processes are busy.[root@squidshare senops]# cat /var/log/squid/cache.log| grep -i warning | grep -i pending2017/04/25
+10:38:13 kid1| WARNING: 40 pending requests queued2017/04/25 10:46:32
+kid1| WARNING: 40 pending requests queued</code></pre>
+<p>Squid listening Port list :</p>
+<pre><code>
+[root@squidshare blacklists]# netstat -tulpna | grep LISTEN
+tcp        0      0 10.32.16.222:2812           0.0.0.0:*                   LISTEN      15511/monit         
+tcp        0      0 127.0.0.1:199               0.0.0.0:*                   LISTEN      29185/snmpd         
+tcp        0      0 0.0.0.0:80                  0.0.0.0:*                   LISTEN      23213/httpd         
+tcp        0      0 0.0.0.0:22                  0.0.0.0:*                   LISTEN      6119/sshd           
+tcp        0      0 0.0.0.0:3000                0.0.0.0:*                   LISTEN      1716/ntop           
+tcp        0      0 0.0.0.0:3001                0.0.0.0:*                   LISTEN      1716/ntop           
+tcp        0      0 10.32.16.222:443            0.0.0.0:*                   LISTEN      23213/httpd         
+tcp        0      0 :::8181                     :::*                        LISTEN      26568/(squid-1)     
+tcp        0      0 :::22                       :::*                        LISTEN      6119/sshd           
+tcp        0      0 :::3127                     :::*                        LISTEN      26568/(squid-1)     
+tcp        0      0 :::3128                     :::*                        LISTEN      26568/(squid-1)</code></pre>
+<p>Important PORT : 3128, 3127,8181</p>
+<p>If SQUID COLLAPSE or DOWN and restart or stop/start SQUID is failed, then stop squid, kill all squid process, flush RAM and reduce redirect_children to 20 child in /etc/squid/squid.conf.<br />
+Stop squid :</p>
+<pre><code>
+ /etc/init.d/squid stop</code></pre>
+<p>Kill all squid process :</p>
+<pre><code>pgrep squid | xargs kill -9</code></pre>
+<p>Flush RAM :</p>
+<pre><code>/usr/bin/wjt-clear-cache</code></pre>
+<p>or</p>
+<pre><code>sync;echo 3 > /proc/sys/vm/drop_caches</code></pre>
+<pre><code>start service squid</code></pre>
+<pre><code>/etc/init.d/squid start</code></pre>
+<p>or</p>
+<pre><code>service squid start</code></pre>
+<p>Script tunning in <a href="https://github.com/wajatmaka/wjtConf/tree/master/Squid/optimize">Link</a></p>
+<h3>Crontab</h3>
+<pre><code>
+AILTO=""
+*/2 * * * * 	/usr/sbin/ntpdate -u 10.32.16.237 <br />
+55 23 * * *     /usr/bin/sarg -x <br />
+#### CHECK OPTIMIZE CACHE RAM ###### <br />
+* * * * *       /usr/bin/wjt-check-ram <br />
+* * * * *       /usr/bin/wjt-check-children <br />
+#### SCHEDULE AUTOMATIC OPTIMIZE CACHE RAM ##### <br />
+### MALAM ### <br />
+58 23 * * *     /usr/bin/wjt-clear-cache <br />
+59 23 * * *     /usr/bin/wjt-check-children <br />
+### SIANG ### <br />
+30 12 * * *     /usr/bin/wjt-clear-cache <br />
+33 12 * * *     /usr/bin/wjt-check-children <br />
+### PAGI ### <br />
+30 8 * * *     /usr/bin/wjt-clear-cache <br />
+33 8 * * *     /usr/bin/wjt-check-children <br />
+#### SNMP PERFORMANCE SERVER MONITORING #### <br />
+*/5 * * * *	/etc/snmp/local-snmp-cronjob > /dev/null 2>&1 <br />
+*/10 * * * *	/etc/snmp/vmstat-cron /var/local/snmp/vmstat <br />
+*/10 * * * *	/etc/snmp/iostat-cron /var/local/snmp/iostat<br />
+#### INTEGRITY FILE #####<br />
+12 1 * * * /usr/local/sbin/samhain -t</code></pre>
